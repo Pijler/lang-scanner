@@ -30,6 +30,19 @@ trait CheckScanner
     }
 
     /**
+     * Get the current translations from a file.
+     */
+    private function currentTranslations(SplFileInfo $file): array
+    {
+        $current = json_decode($file->getContents(), true);
+
+        return collect($current)->dot()->when(
+            $this->input->getOption('no-empty'),
+            fn ($collection) => $collection->filter(fn ($value) => filled($value))
+        )->keys()->toArray();
+    }
+
+    /**
      * Check translations for any issues.
      */
     private function checkTranslations(array $config, array $translations): void
@@ -45,11 +58,9 @@ trait CheckScanner
             ->map(function (SplFileInfo $file) use ($translations) {
                 $this->totalFiles++;
 
-                $current = json_decode($file->getContents(), true);
-
                 $diff = array_diff(
                     collect($translations)->dot()->keys()->toArray(),
-                    collect($current)->dot()->keys()->toArray(),
+                    $this->currentTranslations($file),
                 );
 
                 $this->progressOutput->handle(blank($diff) ? Status::SKIPPED : Status::ERROR);
