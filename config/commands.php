@@ -55,14 +55,7 @@ return [
     */
 
     'hidden' => [
-        NunoMaduro\LaravelConsoleSummary\SummaryCommand::class,
-        Symfony\Component\Console\Command\DumpCompletionCommand::class,
-        Symfony\Component\Console\Command\HelpCommand::class,
-        Illuminate\Console\Scheduling\ScheduleRunCommand::class,
-        Illuminate\Console\Scheduling\ScheduleListCommand::class,
-        Illuminate\Console\Scheduling\ScheduleFinishCommand::class,
-        Illuminate\Foundation\Console\VendorPublishCommand::class,
-        LaravelZero\Framework\Commands\StubPublishCommand::class,
+        LaravelZero\Framework\Commands\BuildCommand::class,
     ],
 
     /*
@@ -77,7 +70,23 @@ return [
     */
 
     'remove' => [
-        //
+        // Illuminate...
+        Illuminate\Console\Scheduling\ScheduleRunCommand::class,
+        Illuminate\Console\Scheduling\ScheduleFinishCommand::class,
+
+        // LaravelZero...
+        LaravelZero\Framework\Commands\InstallCommand::class,
+        LaravelZero\Framework\Commands\MakeCommand::class,
+        LaravelZero\Framework\Commands\RenameCommand::class,
+        LaravelZero\Framework\Commands\TestMakeCommand::class,
+        LaravelZero\Framework\Commands\StubPublishCommand::class,
+
+        // NunoMaduro...
+        NunoMaduro\Collision\Adapters\Laravel\Commands\TestCommand::class,
+        NunoMaduro\LaravelConsoleSummary\SummaryCommand::class,
+
+        // Symfony...
+        Symfony\Component\Console\Command\DumpCompletionCommand::class,
     ],
 
 ];
