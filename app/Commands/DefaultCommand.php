@@ -2,39 +2,50 @@
 
 namespace App\Commands;
 
+use App\Actions\ElaborateSummary;
+use App\Actions\Scanner;
 use LaravelZero\Framework\Commands\Command;
+use Symfony\Component\Console\Input\InputOption;
 
 class DefaultCommand extends Command
 {
     /**
      * The name and signature of the console command.
-     *
-     * @var string
      */
     protected $signature = 'default';
 
     /**
      * The console command description.
-     *
-     * @var string
      */
     protected $description = 'Scan files and update translations';
 
     /**
      * The configuration of the command.
-     *
-     * @return void
      */
-    protected function configure()
+    protected function configure(): void
     {
         parent::configure();
+
+        $this->setDefinition([
+            new InputOption('option', '', InputOption::VALUE_REQUIRED, 'The option to use in configuration file'),
+            new InputOption('check', '', InputOption::VALUE_NONE, 'Check if all translations in same folder have the same keys, and the same order'),
+            new InputOption('diff', '', InputOption::VALUE_REQUIRED, 'Only check files that have changed since branching off from the given branch', null, ['main', 'master', 'origin/main', 'origin/master']),
+            new InputOption('dirty', '', InputOption::VALUE_NONE, 'Only check files that have uncommitted changes'),
+            new InputOption('dry-run', '', InputOption::VALUE_NONE, 'Run the command without making any changes'),
+        ]);
     }
 
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(Scanner $scanner, ElaborateSummary $summary): int
     {
-        // dd($this);
+        dd($scanner, $summary);
+
+        // $test = $scanner->execute();
+
+        // dd($this->input);
+
+        dd($this->input);
     }
 }
