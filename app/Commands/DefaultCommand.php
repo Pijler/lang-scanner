@@ -32,7 +32,6 @@ class DefaultCommand extends Command
             new InputOption('check', '', InputOption::VALUE_NONE, 'Check if all translations in same folder have the same keys, and the same order'),
             new InputOption('diff', '', InputOption::VALUE_REQUIRED, 'Only check files that have changed since branching off from the given branch', null, ['main', 'master', 'origin/main', 'origin/master']),
             new InputOption('dirty', '', InputOption::VALUE_NONE, 'Only check files that have uncommitted changes'),
-            new InputOption('dry-run', '', InputOption::VALUE_NONE, 'Run the command without making any changes'),
         ]);
     }
 
@@ -41,8 +40,8 @@ class DefaultCommand extends Command
      */
     public function handle(Scanner $scanner, ElaborateSummary $summary): int
     {
-        $test = $scanner->execute();
+        [$totalFiles, $changes] = $scanner->execute();
 
-        dd($test);
+        return $summary->execute($totalFiles, $changes);
     }
 }

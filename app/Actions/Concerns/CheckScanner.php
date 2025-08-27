@@ -2,6 +2,7 @@
 
 namespace App\Actions\Concerns;
 
+use App\Enum\Status;
 use App\Project;
 use Illuminate\Support\Facades\File;
 use Symfony\Component\Console\Input\InputInterface;
@@ -42,16 +43,21 @@ trait CheckScanner
                 return $file->getExtension() === 'json';
             })
             ->map(function (SplFileInfo $file) use ($translations) {
+                $this->totalFiles++;
+
                 $current = json_decode($file->getContents(), true);
 
-                $diffQuantity = count(array_diff(
+                $diff = array_diff(
                     collect($translations)->dot()->keys()->toArray(),
                     collect($current)->dot()->keys()->toArray(),
-                ));
+                );
+
+                $this->progressOutput->handle(blank($diff) ? Status::SKIPPED : Status::ERROR);
 
                 $this->changes[] = [
-                    'quantity' => $diffQuantity,
+                    'count' => count($diff),
                     'file' => $file->getRealPath(),
+                    'issues' => array_values($diff),
                 ];
             });
     }

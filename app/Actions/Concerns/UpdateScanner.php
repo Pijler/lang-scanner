@@ -26,10 +26,6 @@ trait UpdateScanner
      */
     protected function updateScanner(array $config): void
     {
-        if (isset($config['check_only']) && $config['check_only']) {
-            return;
-        }
-
         $collectedKeys = [];
 
         $files = $this->getFilesToScan($config);
@@ -39,7 +35,7 @@ trait UpdateScanner
         $files->each(function (SplFileInfo $file) use ($config, &$collectedKeys) {
             $this->totalFiles++;
 
-            $this->progressOutput->handle(Status::OK);
+            $this->progressOutput->handle(Status::SKIPPED);
 
             $keys = $this->extractTranslationKeysFromFile($file, $config);
 
@@ -76,12 +72,12 @@ trait UpdateScanner
     {
         $newTranslations = array_replace_recursive($new, $old);
 
-        $diffQuantity = count(array_diff(
+        $diff = array_diff(
             collect($newTranslations)->dot()->keys()->toArray(),
             collect($old)->dot()->keys()->toArray(),
-        ));
+        );
 
-        return [$newTranslations, $diffQuantity];
+        return [$newTranslations, $diff];
     }
 
     /**
@@ -142,6 +138,8 @@ trait UpdateScanner
      */
     private function addNewTranslations(array $config, array $new): void
     {
+        $checkOnly = isset($config['check_only']) && $config['check_only'];
+
         $files = rescue(function () use ($config) {
             return File::allFiles(Project::path().'/'.$config['lang_path']);
         }, [], false);
@@ -150,16 +148,20 @@ trait UpdateScanner
             ->filter(function (SplFileInfo $file) {
                 return $file->getExtension() === 'json';
             })
-            ->map(function (SplFileInfo $file) use ($new) {
+            ->map(function (SplFileInfo $file) use ($new, $checkOnly) {
                 $old = json_decode($file->getContents(), true);
 
-                [$newTranslations, $diffQuantity] = $this->mergeTranslations($old, $new);
+                [$newTranslations, $diff] = $this->mergeTranslations($old, $new);
 
-                File::put($file->getRealPath(), json_encode($newTranslations, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+                if (! $checkOnly) {
+                    File::put($file->getRealPath(), json_encode($newTranslations, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+                }
 
                 $this->changes[] = [
-                    'quantity' => $diffQuantity,
+                    'count' => count($diff),
+                    'check_only' => $checkOnly,
                     'file' => $file->getRealPath(),
+                    'issues' => array_values($diff),
                 ];
             });
     }
