@@ -2,6 +2,7 @@
 
 namespace App\Actions;
 
+use App\Output\SummaryOutput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -13,6 +14,7 @@ class ElaborateSummary
     public function __construct(
         protected InputInterface $input,
         protected OutputInterface $output,
+        protected SummaryOutput $summaryOutput,
     ) {
         //
     }
