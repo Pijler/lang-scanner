@@ -3,7 +3,6 @@
 namespace App\Repositories;
 
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Str;
 
 class ConfigurationJsonRepository
 {
@@ -11,7 +10,8 @@ class ConfigurationJsonRepository
      * The default configuration values.
      */
     protected const array DEFAULT = [
-        [
+        'extensions' => [],
+        'scanner' => [
             'lang_path' => 'lang/',
             'paths' => [
                 'app/',
@@ -34,25 +34,30 @@ class ConfigurationJsonRepository
      */
     public function __construct(
         protected string $path,
-        protected ?string $option,
     ) {}
 
     /**
-     * Get the config options.
+     * Get the scanner configuration.
      */
-    public function config(): array
+    public function scanner(): array
     {
-        $scan = $this->get() ?? [];
-
-        return is_null($this->option) ? $scan : array_slice($scan, $this->option, 1);
+        return data_get($this->get(), 'scanner', []);
     }
 
     /**
-     * Get the configuration from the "scan.json" file.
+     * Get the file extensions to scan.
+     */
+    public function extensions(): array
+    {
+        return data_get($this->get(), 'extensions', []);
+    }
+
+    /**
+     * Get the configuration from the "scanner.json" file.
      */
     protected function get(): array
     {
-        if (! is_null($this->path) && $this->fileExists((string) $this->path)) {
+        if (! is_null($this->path) && File::exists($this->path)) {
             $baseConfig = json_decode(File::get($this->path), true);
 
             return tap($baseConfig, function ($configuration) {
@@ -63,16 +68,5 @@ class ConfigurationJsonRepository
         }
 
         return self::DEFAULT;
-    }
-
-    /**
-     * Determine if a local or remote file exists.
-     */
-    protected function fileExists(string $path): bool
-    {
-        return match (true) {
-            Str::startsWith($path, ['http://', 'https://']) => Str::of(get_headers($path)[0])->contains('200 OK'),
-            default => File::exists($path)
-        };
     }
 }

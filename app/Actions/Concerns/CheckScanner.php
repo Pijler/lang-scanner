@@ -3,30 +3,45 @@
 namespace App\Actions\Concerns;
 
 use App\Enum\Status;
-use App\Project;
-use Illuminate\Support\Facades\File;
+use App\Output\ProgressOutput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Finder\SplFileInfo;
 
-/**
- * @property array $paths
- * @property array $changes
- * @property int $totalFiles
- * @property InputInterface $input
- * @property OutputInterface $output
- * @property ProgressOutput $progressOutput
- */
-trait CheckScanner
+class CheckScanner
 {
+    use BaseMethods;
+
     /**
-     * Checks translation file for any issues.
+     * The changes made during the scan.
      */
-    protected function checkScanner(array $config): void
+    protected array $changes = [];
+
+    /**
+     * The total number of files scanned.
+     */
+    protected int $totalFiles = 0;
+
+    /**
+     * Creates a new Scanner instance.
+     */
+    public function __construct(
+        protected array $paths,
+        protected InputInterface $input,
+        protected OutputInterface $output,
+        protected ProgressOutput $progressOutput,
+    ) {}
+
+    /**
+     * Scanner the project resolved by the current input and output.
+     */
+    public function execute(array $config): array
     {
         $translations = $this->getTranslations($config);
 
         $this->checkTranslations($config, $translations);
+
+        return [$this->totalFiles, $this->changes];
     }
 
     /**
@@ -47,9 +62,7 @@ trait CheckScanner
      */
     private function checkTranslations(array $config, array $translations): void
     {
-        $files = rescue(function () use ($config) {
-            return File::allFiles(Project::path().'/'.$config['lang_path']);
-        }, [], false);
+        $files = $this->getFiles($config);
 
         collect($files)
             ->filter(function (SplFileInfo $file) {

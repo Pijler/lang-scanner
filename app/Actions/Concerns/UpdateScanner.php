@@ -3,7 +3,9 @@
 namespace App\Actions\Concerns;
 
 use App\Enum\Status;
+use App\Output\ProgressOutput;
 use App\Project;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
@@ -11,20 +13,34 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Finder\SplFileInfo;
 
-/**
- * @property array $paths
- * @property array $changes
- * @property int $totalFiles
- * @property InputInterface $input
- * @property OutputInterface $output
- * @property ProgressOutput $progressOutput
- */
-trait UpdateScanner
+class UpdateScanner
 {
+    use BaseMethods;
+
     /**
-     * Updates translation files.
+     * The changes made during the scan.
      */
-    protected function updateScanner(array $config): void
+    protected array $changes = [];
+
+    /**
+     * The total number of files scanned.
+     */
+    protected int $totalFiles = 0;
+
+    /**
+     * Creates a new Scanner instance.
+     */
+    public function __construct(
+        protected array $paths,
+        protected InputInterface $input,
+        protected OutputInterface $output,
+        protected ProgressOutput $progressOutput,
+    ) {}
+
+    /**
+     * Scanner the project resolved by the current input and output.
+     */
+    public function execute(array $config): array
     {
         $collectedKeys = [];
 
@@ -47,6 +63,8 @@ trait UpdateScanner
         if (filled($newTranslations)) {
             $this->addNewTranslations($config, $newTranslations);
         }
+
+        return [$this->totalFiles, $this->changes];
     }
 
     /**
@@ -140,9 +158,7 @@ trait UpdateScanner
     {
         $checkOnly = isset($config['check_only']) && $config['check_only'];
 
-        $files = rescue(function () use ($config) {
-            return File::allFiles(Project::path().'/'.$config['lang_path']);
-        }, [], false);
+        $files = $this->getFiles($config);
 
         collect($files)
             ->filter(function (SplFileInfo $file) {
@@ -154,7 +170,7 @@ trait UpdateScanner
                 [$newTranslations, $diff] = $this->mergeTranslations($old, $new);
 
                 if (! $checkOnly) {
-                    File::put($file->getRealPath(), json_encode($newTranslations, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+                    File::put($file->getRealPath(), json_encode($newTranslations, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
                 }
 
                 $this->changes[] = [
@@ -172,6 +188,7 @@ trait UpdateScanner
     private function returnNewTranslations(array $translations, array $collectedKeys): array
     {
         $allTranslations = collect($collectedKeys)
+            ->filter(fn ($key) => ! Arr::has($translations, $key))
             ->keyBy(fn ($key) => $key)
             ->map(fn () => '')
             ->undot()

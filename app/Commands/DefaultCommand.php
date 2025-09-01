@@ -28,7 +28,6 @@ class DefaultCommand extends Command
 
         $this->setDefinition([
             new InputOption('config', '', InputOption::VALUE_REQUIRED, 'The configuration that should be used'),
-            new InputOption('option', '', InputOption::VALUE_REQUIRED, 'The option to use in configuration file'),
             new InputOption('check', '', InputOption::VALUE_NONE, 'Check if all translations in same folder have the same keys, and the same order'),
             new InputOption('diff', '', InputOption::VALUE_REQUIRED, 'Only check files that have changed since branching off from the given branch', null, ['main', 'master', 'origin/main', 'origin/master']),
             new InputOption('dirty', '', InputOption::VALUE_NONE, 'Only check files that have uncommitted changes'),

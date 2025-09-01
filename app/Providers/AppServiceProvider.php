@@ -9,7 +9,6 @@ use App\Contracts\PathsRepository;
 use App\Output\ProgressOutput;
 use App\Output\SummaryOutput;
 use App\Project;
-use App\Repositories\ConfigurationJsonRepository;
 use App\Repositories\GitPathsRepository;
 use Illuminate\Support\ServiceProvider;
 use Symfony\Component\Console\Input\InputInterface;
@@ -62,15 +61,6 @@ class AppServiceProvider extends ServiceProvider
                     resolve(InputInterface::class),
                     resolve(OutputInterface::class),
                 )
-            );
-        });
-
-        $this->app->singleton(ConfigurationJsonRepository::class, function () {
-            $input = resolve(InputInterface::class);
-
-            return new ConfigurationJsonRepository(
-                $input->getOption('config') ?: Project::path().'/scanner.json',
-                $input->getOption('option'),
             );
         });
     }

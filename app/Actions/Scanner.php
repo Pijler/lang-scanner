@@ -3,20 +3,15 @@
 namespace App\Actions;
 
 use App\Actions\Concerns\CheckScanner;
+use App\Actions\Concerns\RecursiveConfigs;
 use App\Actions\Concerns\UpdateScanner;
 use App\Output\ProgressOutput;
 use App\Project;
-use App\Repositories\ConfigurationJsonRepository;
-use Illuminate\Support\Facades\File;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Finder\SplFileInfo;
 
 class Scanner
 {
-    use CheckScanner;
-    use UpdateScanner;
-
     /**
      * The paths to scan.
      */
@@ -48,7 +43,7 @@ class Scanner
      */
     public function execute(): array
     {
-        $configs = resolve(ConfigurationJsonRepository::class)->config();
+        $configs = $this->getConfigs();
 
         collect($configs)->each(function (array $config) {
             $this->input->getOption('check')
@@ -60,39 +55,44 @@ class Scanner
     }
 
     /**
-     * Extract only the keys from a multi-dimensional array.
+     * Get the configuration files to scan.
      */
-    protected function extractKeys(array $array): array
+    private function getConfigs(): array
     {
-        $result = [];
+        $path = $this->input->getOption('config') ?: Project::path().'/scanner.json';
 
-        foreach ($array as $key => $value) {
-            $result[$key] = is_array($value) ? $this->extractKeys($value) : '';
-        }
-
-        return $result;
+        return (new RecursiveConfigs($path))->execute();
     }
 
     /**
-     * Gets the translations from the language files.
+     * Check the project for translation issues.
      */
-    protected function getTranslations(array $config): array
+    private function checkScanner(array $config): void
     {
-        abort_unless(isset($config['lang_path']), 'Language path is not set.');
+        [$totalFiles, $changes] = (new CheckScanner(
+            input: $this->input,
+            paths: $this->paths,
+            output: $this->output,
+            progressOutput: $this->progressOutput,
+        ))->execute($config);
 
-        $files = rescue(function () use ($config) {
-            return File::allFiles(Project::path().'/'.$config['lang_path']);
-        }, [], false);
+        $this->totalFiles += $totalFiles;
+        $this->changes = array_merge($this->changes, $changes);
+    }
 
-        return collect($files)
-            ->filter(function (SplFileInfo $file) {
-                return $file->getExtension() === 'json';
-            })
-            ->map(function (SplFileInfo $file) {
-                return json_decode($file->getContents(), true);
-            })
-            ->reduce(function (array $carry, array $item) {
-                return array_replace_recursive($carry, $this->extractKeys($item));
-            }, []);
+    /**
+     * Update the project with new translations.
+     */
+    private function updateScanner(array $config): void
+    {
+        [$totalFiles, $changes] = (new UpdateScanner(
+            input: $this->input,
+            paths: $this->paths,
+            output: $this->output,
+            progressOutput: $this->progressOutput,
+        ))->execute($config);
+
+        $this->totalFiles += $totalFiles;
+        $this->changes = array_merge($this->changes, $changes);
     }
 }
