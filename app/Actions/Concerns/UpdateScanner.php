@@ -108,8 +108,8 @@ class UpdateScanner
         abort_unless(isset($config['extensions']), 'Extensions are not set.');
 
         return collect($config['paths'])
-            ->map(function ($path) {
-                $fullPath = Project::path($this->input).'/'.$path;
+            ->map(function ($path) use ($config) {
+                $fullPath = $config['base_path'].'/'.$path;
 
                 return File::exists($fullPath) ? File::allFiles($fullPath) : [];
             })

@@ -12,19 +12,21 @@ class ConfigurationJsonRepository
     protected const array DEFAULT = [
         'extensions' => [],
         'scanner' => [
-            'lang_path' => 'lang/',
-            'paths' => [
-                'app/',
-                'resources/',
-            ],
-            'extensions' => [
-                '.php',
-                '.html',
-            ],
-            'methods' => [
-                '__',
-                'trans',
-                'trans_choice',
+            [
+                'lang_path' => 'lang/',
+                'paths' => [
+                    'app/',
+                    'resources/',
+                ],
+                'extensions' => [
+                    '.php',
+                    '.html',
+                ],
+                'methods' => [
+                    '__',
+                    'trans',
+                    'trans_choice',
+                ],
             ],
         ],
     ];
