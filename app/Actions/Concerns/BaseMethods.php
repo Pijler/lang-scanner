@@ -15,7 +15,7 @@ trait BaseMethods
      */
     protected function putContent(SplFileInfo $file, array $content): void
     {
-        $file->openFile('w')->fwrite(json_encode($content, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        $file->openFile('w')->fwrite(json_encode($content, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
     }
 
     /**
