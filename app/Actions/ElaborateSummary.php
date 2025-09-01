@@ -27,11 +27,7 @@ class ElaborateSummary
 
         $this->summaryOutput->handle($totalFiles, $changes);
 
-        if ($this->input->getOption('check')) {
-            return $count > 0 ? Command::FAILURE : Command::SUCCESS;
-        }
-
-        return Command::SUCCESS;
+        return $count > 0 ? Command::FAILURE : Command::SUCCESS;
     }
 
     /**

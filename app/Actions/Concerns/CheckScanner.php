@@ -27,6 +27,7 @@ class CheckScanner
      */
     public function __construct(
         protected array $paths,
+        protected array $config,
         protected InputInterface $input,
         protected OutputInterface $output,
         protected ProgressOutput $progressOutput,
@@ -35,13 +36,22 @@ class CheckScanner
     /**
      * Scanner the project resolved by the current input and output.
      */
-    public function execute(array $config): array
+    public function execute(): array
     {
-        $translations = $this->getTranslations($config);
+        $translations = $this->getTranslations();
 
-        $this->checkTranslations($config, $translations);
+        $this->checkTranslations($translations);
 
         return [$this->totalFiles, $this->changes];
+    }
+
+    /**
+     * Checks if the translations should be sorted.
+     */
+    private function sorted(): bool
+    {
+        return $this->input->getOption('sort')
+            || (isset($this->config['sort']) && $this->config['sort']);
     }
 
     /**
@@ -60,15 +70,17 @@ class CheckScanner
     /**
      * Check translations for any issues.
      */
-    private function checkTranslations(array $config, array $translations): void
+    private function checkTranslations(array $translations): void
     {
-        $files = $this->getFiles($config);
+        $sort = $this->sorted();
+
+        $files = $this->getFiles();
 
         collect($files)
             ->filter(function (SplFileInfo $file) {
                 return $file->getExtension() === 'json';
             })
-            ->map(function (SplFileInfo $file) use ($translations) {
+            ->map(function (SplFileInfo $file) use ($sort, $translations) {
                 $this->totalFiles++;
 
                 $diff = array_diff(
@@ -76,9 +88,16 @@ class CheckScanner
                     $this->currentTranslations($file),
                 );
 
+                if ($sort) {
+                    $content = json_decode($file->getContents(), true);
+
+                    $this->putContent($file, $this->sortRecursive($content));
+                }
+
                 $this->progressOutput->handle(blank($diff) ? Status::SKIPPED : Status::ERROR);
 
                 $this->changes[] = [
+                    'check' => true,
                     'count' => count($diff),
                     'file' => $file->getRealPath(),
                     'issues' => array_values($diff),

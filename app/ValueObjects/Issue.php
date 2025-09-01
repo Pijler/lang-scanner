@@ -11,10 +11,10 @@ class Issue
      */
     public function __construct(
         protected int $count,
+        protected bool $check,
         protected string $path,
         protected string $file,
         protected array $changes,
-        protected Status $status,
     ) {}
 
     /**
@@ -30,7 +30,7 @@ class Issue
      */
     public function color(): string
     {
-        return $this->status->color();
+        return $this->status()->symbol()['color'];
     }
 
     /**
@@ -38,7 +38,7 @@ class Issue
      */
     public function symbol(): string
     {
-        return $this->status->symbol()['symbol'];
+        return $this->status()->symbol()['symbol'];
     }
 
     /**
@@ -47,6 +47,14 @@ class Issue
     public function description(): string
     {
         return collect($this->changes)->implode(', ');
+    }
+
+    /**
+     * Gets the status for the issue.
+     */
+    private function status(): Status
+    {
+        return $this->check ? Status::ERROR : Status::OK;
     }
 
     /**

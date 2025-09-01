@@ -6,17 +6,25 @@ use Illuminate\Support\Facades\File;
 use Symfony\Component\Finder\SplFileInfo;
 
 /**
- * @property string $basePath
+ * @property array $config
  */
 trait BaseMethods
 {
     /**
+     * Puts the content into the specified file.
+     */
+    protected function putContent(SplFileInfo $file, array $content): void
+    {
+        $file->openFile('w')->fwrite(json_encode($content, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+    }
+
+    /**
      * Get all files from the specified configuration.
      */
-    protected function getFiles(array $config): array
+    protected function getFiles(): array
     {
-        return rescue(function () use ($config) {
-            return File::allFiles($config['base_path'].'/'.$config['lang_path']);
+        return rescue(function () {
+            return File::allFiles($this->config['base_path'].'/'.$this->config['lang_path']);
         }, [], false);
     }
 
@@ -35,13 +43,29 @@ trait BaseMethods
     }
 
     /**
+     * Sorts a multi-dimensional array recursively.
+     */
+    protected function sortRecursive(array $array): array
+    {
+        ksort($array);
+
+        foreach ($array as &$value) {
+            if (is_array($value)) {
+                $value = $this->sortRecursive($value);
+            }
+        }
+
+        return $array;
+    }
+
+    /**
      * Gets the translations from the language files.
      */
-    protected function getTranslations(array $config): array
+    protected function getTranslations(): array
     {
-        abort_unless(isset($config['lang_path']), 'Language path is not set.');
+        abort_unless(isset($this->config['lang_path']), 'Language path is not set.');
 
-        $files = $this->getFiles($config);
+        $files = $this->getFiles();
 
         return collect($files)
             ->filter(function (SplFileInfo $file) {

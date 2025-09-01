@@ -4,7 +4,6 @@ namespace App\Actions\Concerns;
 
 use App\Enum\Status;
 use App\Output\ProgressOutput;
-use App\Project;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
@@ -32,6 +31,7 @@ class UpdateScanner
      */
     public function __construct(
         protected array $paths,
+        protected array $config,
         protected InputInterface $input,
         protected OutputInterface $output,
         protected ProgressOutput $progressOutput,
@@ -40,20 +40,20 @@ class UpdateScanner
     /**
      * Scanner the project resolved by the current input and output.
      */
-    public function execute(array $config): array
+    public function execute(): array
     {
         $collectedKeys = [];
 
-        $files = $this->getFilesToScan($config);
+        $files = $this->getFilesToScan();
 
-        $translations = $this->getTranslations($config);
+        $translations = $this->getTranslations();
 
-        $files->each(function (SplFileInfo $file) use ($config, &$collectedKeys) {
+        $files->each(function (SplFileInfo $file) use (&$collectedKeys) {
             $this->totalFiles++;
 
             $this->progressOutput->handle(Status::SKIPPED);
 
-            $keys = $this->extractTranslationKeysFromFile($file, $config);
+            $keys = $this->extractTranslationKeysFromFile($file);
 
             $collectedKeys = array_merge($collectedKeys, $keys);
         });
@@ -61,26 +61,10 @@ class UpdateScanner
         $newTranslations = $this->returnNewTranslations($translations, $collectedKeys);
 
         if (filled($newTranslations)) {
-            $this->addNewTranslations($config, $newTranslations);
+            $this->addNewTranslations($newTranslations);
         }
 
         return [$this->totalFiles, $this->changes];
-    }
-
-    /**
-     * Sorts a multi-dimensional array recursively.
-     */
-    private function sortRecursive(array $array): array
-    {
-        ksort($array);
-
-        foreach ($array as &$value) {
-            if (is_array($value)) {
-                $value = $this->sortRecursive($value);
-            }
-        }
-
-        return $array;
     }
 
     /**
@@ -101,21 +85,21 @@ class UpdateScanner
     /**
      * Get files to scan based on configuration.
      */
-    private function getFilesToScan(array $config): Collection
+    private function getFilesToScan(): Collection
     {
-        abort_unless(isset($config['paths']), 'Paths are not set.');
+        abort_unless(isset($this->config['paths']), 'Paths are not set.');
 
-        abort_unless(isset($config['extensions']), 'Extensions are not set.');
+        abort_unless(isset($this->config['extensions']), 'Extensions are not set.');
 
-        return collect($config['paths'])
-            ->map(function ($path) use ($config) {
-                $fullPath = $config['base_path'].'/'.$path;
+        return collect($this->config['paths'])
+            ->map(function ($path) {
+                $fullPath = $this->config['base_path'].'/'.$path;
 
                 return File::exists($fullPath) ? File::allFiles($fullPath) : [];
             })
             ->collapse()
-            ->filter(function (SplFileInfo $file) use ($config) {
-                return Str::endsWith($file->getFilename(), $config['extensions']);
+            ->filter(function (SplFileInfo $file) {
+                return Str::endsWith($file->getFilename(), $this->config['extensions']);
             })
             ->filter(function (SplFileInfo $file) {
                 return Str::startsWith($file->getPathname(), $this->paths);
@@ -126,15 +110,15 @@ class UpdateScanner
     /**
      * Extract translation keys from a file based on config methods.
      */
-    private function extractTranslationKeysFromFile(SplFileInfo $file, array $config): array
+    private function extractTranslationKeysFromFile(SplFileInfo $file): array
     {
         $keys = [];
 
         $content = $file->getContents();
 
-        abort_unless(isset($config['methods']), 'Methods are not set in config.');
+        abort_unless(isset($this->config['methods']), 'Methods are not set in config.');
 
-        $patterns = collect($config['methods'])->map(function ($method) {
+        $patterns = collect($this->config['methods'])->map(function ($method) {
             $escapedMethod = preg_quote($method, '/');
 
             return "/\\b{$escapedMethod}\\s*\\(\\s*['\"]([^'\"]+)['\"]\\s*[\\),]/";
@@ -154,28 +138,23 @@ class UpdateScanner
     /**
      * Add new translations to the translation file.
      */
-    private function addNewTranslations(array $config, array $new): void
+    private function addNewTranslations(array $new): void
     {
-        $checkOnly = isset($config['check_only']) && $config['check_only'];
-
-        $files = $this->getFiles($config);
+        $files = $this->getFiles();
 
         collect($files)
             ->filter(function (SplFileInfo $file) {
                 return $file->getExtension() === 'json';
             })
-            ->map(function (SplFileInfo $file) use ($new, $checkOnly) {
+            ->map(function (SplFileInfo $file) use ($new) {
                 $old = json_decode($file->getContents(), true);
 
                 [$newTranslations, $diff] = $this->mergeTranslations($old, $new);
 
-                if (! $checkOnly) {
-                    File::put($file->getRealPath(), json_encode($newTranslations, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-                }
+                $this->putContent($file, $newTranslations);
 
                 $this->changes[] = [
                     'count' => count($diff),
-                    'check_only' => $checkOnly,
                     'file' => $file->getRealPath(),
                     'issues' => array_values($diff),
                 ];
@@ -187,15 +166,13 @@ class UpdateScanner
      */
     private function returnNewTranslations(array $translations, array $collectedKeys): array
     {
-        $allTranslations = collect($collectedKeys)
+        $all = collect($collectedKeys)
             ->filter(fn ($key) => ! Arr::has($translations, $key))
             ->keyBy(fn ($key) => $key)
             ->map(fn () => '')
             ->undot()
             ->toArray();
 
-        $newTranslations = array_replace_recursive($translations, $allTranslations);
-
-        return $this->sortRecursive($newTranslations);
+        return $this->sortRecursive(array_replace_recursive($translations, $all));
     }
 }

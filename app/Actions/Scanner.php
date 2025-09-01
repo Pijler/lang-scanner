@@ -46,12 +46,21 @@ class Scanner
         $configs = $this->getConfigs();
 
         collect($configs)->each(function (array $config) {
-            $this->input->getOption('check')
+            $this->checked($config)
                 ? $this->checkScanner($config)
                 : $this->updateScanner($config);
         });
 
         return [$this->totalFiles, $this->changes];
+    }
+
+    /**
+     * Checks if the scanner is in check-only mode.
+     */
+    private function checked(array $config): bool
+    {
+        return $this->input->getOption('check')
+            || (isset($config['check']) && $config['check']);
     }
 
     /**
@@ -70,11 +79,12 @@ class Scanner
     private function checkScanner(array $config): void
     {
         [$totalFiles, $changes] = (new CheckScanner(
+            config: $config,
             input: $this->input,
             paths: $this->paths,
             output: $this->output,
             progressOutput: $this->progressOutput,
-        ))->execute($config);
+        ))->execute();
 
         $this->totalFiles += $totalFiles;
         $this->changes = array_merge($this->changes, $changes);
@@ -86,11 +96,12 @@ class Scanner
     private function updateScanner(array $config): void
     {
         [$totalFiles, $changes] = (new UpdateScanner(
+            config: $config,
             input: $this->input,
             paths: $this->paths,
             output: $this->output,
             progressOutput: $this->progressOutput,
-        ))->execute($config);
+        ))->execute();
 
         $this->totalFiles += $totalFiles;
         $this->changes = array_merge($this->changes, $changes);

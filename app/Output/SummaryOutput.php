@@ -2,7 +2,6 @@
 
 namespace App\Output;
 
-use App\Enum\Status;
 use App\Output\Concerns\InteractsWithSymbols;
 use App\Project;
 use App\ValueObjects\Issue;
@@ -66,23 +65,7 @@ class SummaryOutput
             file: $change['file'],
             count: $change['count'],
             changes: $change['issues'],
-            status: $this->getIssueStatus($change),
+            check: isset($change['check']) && $change['check'],
         ))->values();
-    }
-
-    /**
-     * Gets the issue status based on the change details.
-     */
-    private function getIssueStatus(array $change): Status
-    {
-        if ($this->input->getOption('check')) {
-            return Status::ERROR;
-        }
-
-        if (isset($change['check_only']) && $change['check_only']) {
-            return Status::SKIPPED;
-        }
-
-        return Status::OK;
     }
 }
