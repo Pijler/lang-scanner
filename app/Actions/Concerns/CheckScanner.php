@@ -4,6 +4,7 @@ namespace App\Actions\Concerns;
 
 use App\Enum\Status;
 use App\Output\ProgressOutput;
+use Illuminate\Support\Arr;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Finder\SplFileInfo;
@@ -13,21 +14,10 @@ class CheckScanner
     use BaseMethods;
 
     /**
-     * The changes made during the scan.
-     */
-    protected array $changes = [];
-
-    /**
-     * The total number of files scanned.
-     */
-    protected int $totalFiles = 0;
-
-    /**
      * Creates a new Scanner instance.
      */
     public function __construct(
         protected array $paths,
-        protected array $config,
         protected InputInterface $input,
         protected OutputInterface $output,
         protected ProgressOutput $progressOutput,
@@ -36,8 +26,10 @@ class CheckScanner
     /**
      * Scanner the project resolved by the current input and output.
      */
-    public function execute(): array
+    public function execute(array $config): array
     {
+        $this->config = $config;
+
         $translations = $this->getTranslations();
 
         $this->checkTranslations($translations);
@@ -50,18 +42,15 @@ class CheckScanner
      */
     private function sorted(): bool
     {
-        return $this->input->getOption('sort')
-            || (isset($this->config['sort']) && $this->config['sort']);
+        return $this->input->getOption('sort') || data_get($this->config, 'sort', false);
     }
 
     /**
      * Get the current translations from a file.
      */
-    private function currentTranslations(SplFileInfo $file): array
+    private function currentTranslations(array $content): array
     {
-        $current = json_decode($file->getContents(), true);
-
-        return collect($current)->dot()->when(
+        return collect($content)->dot()->when(
             $this->input->getOption('no-empty'),
             fn ($collection) => $collection->filter(fn ($value) => filled($value))
         )->keys()->toArray();
@@ -83,15 +72,15 @@ class CheckScanner
             ->map(function (SplFileInfo $file) use ($sort, $translations) {
                 $this->totalFiles++;
 
+                $content = json_decode($file->getContents(), true);
+
                 $diff = array_diff(
                     collect($translations)->dot()->keys()->toArray(),
-                    $this->currentTranslations($file),
+                    $this->currentTranslations($content),
                 );
 
                 if ($sort) {
-                    $content = json_decode($file->getContents(), true);
-
-                    $this->putContent($file, $this->sortRecursive($content));
+                    $this->putContent($file, Arr::sortRecursive($content));
                 }
 
                 $this->progressOutput->handle(blank($diff) ? Status::SKIPPED : Status::ERROR);

@@ -17,21 +17,10 @@ class UpdateScanner
     use BaseMethods;
 
     /**
-     * The changes made during the scan.
-     */
-    protected array $changes = [];
-
-    /**
-     * The total number of files scanned.
-     */
-    protected int $totalFiles = 0;
-
-    /**
      * Creates a new Scanner instance.
      */
     public function __construct(
         protected array $paths,
-        protected array $config,
         protected InputInterface $input,
         protected OutputInterface $output,
         protected ProgressOutput $progressOutput,
@@ -40,9 +29,11 @@ class UpdateScanner
     /**
      * Scanner the project resolved by the current input and output.
      */
-    public function execute(): array
+    public function execute(array $config): array
     {
         $collectedKeys = [];
+
+        $this->config = $config;
 
         $files = $this->getFilesToScan();
 
@@ -72,14 +63,13 @@ class UpdateScanner
      */
     private function mergeTranslations(array $old, array $new): array
     {
-        $newTranslations = array_replace_recursive($new, $old);
+        $merged = array_replace_recursive($new, $old);
 
-        $diff = array_diff(
-            collect($newTranslations)->dot()->keys()->toArray(),
-            collect($old)->dot()->keys()->toArray(),
-        );
+        $diff = collect($merged)->dot()->keys()->diff(
+            collect($old)->dot()->keys()
+        )->values()->toArray();
 
-        return [$newTranslations, $diff];
+        return [$merged, $diff];
     }
 
     /**
@@ -95,7 +85,7 @@ class UpdateScanner
             ->map(function ($path) {
                 $fullPath = $this->config['base_path'].'/'.$path;
 
-                return File::exists($fullPath) ? File::allFiles($fullPath) : [];
+                return rescue(fn () => File::allFiles($fullPath), [], false);
             })
             ->collapse()
             ->filter(function (SplFileInfo $file) {
@@ -112,27 +102,17 @@ class UpdateScanner
      */
     private function extractTranslationKeysFromFile(SplFileInfo $file): array
     {
-        $keys = [];
-
         $content = $file->getContents();
 
         abort_unless(isset($this->config['methods']), 'Methods are not set in config.');
 
-        $patterns = collect($this->config['methods'])->map(function ($method) {
-            $escapedMethod = preg_quote($method, '/');
-
-            return "/\\b{$escapedMethod}\\s*\\(\\s*['\"]([^'\"]+)['\"]\\s*[\\),]/";
-        })->toArray();
-
-        foreach ($patterns as $pattern) {
+        return collect($this->config['methods'])->map(function ($method) {
+            return '/\\b'.preg_quote($method, '/')."\\s*\\(\\s*['\"]([^'\"]+)['\"]\\s*[\\),]/";
+        })->flatMap(function ($pattern) use ($content) {
             preg_match_all($pattern, $content, $matches);
 
-            if (filled($matches[1])) {
-                $keys = array_merge($keys, $matches[1]);
-            }
-        }
-
-        return array_filter(array_unique($keys), fn ($key) => filled($key));
+            return $matches[1] ?? [];
+        })->filter()->unique()->values()->toArray();
     }
 
     /**
@@ -166,13 +146,22 @@ class UpdateScanner
      */
     private function returnNewTranslations(array $translations, array $collectedKeys): array
     {
-        $all = collect($collectedKeys)
-            ->filter(fn ($key) => ! Arr::has($translations, $key))
-            ->keyBy(fn ($key) => $key)
-            ->map(fn () => '')
-            ->undot()
-            ->toArray();
+        $newEntries = collect($collectedKeys)
+            ->reject(fn ($key) => Arr::has($translations, $key))
+            ->partition(fn ($key) => ! str_contains($key, ' '))
+            ->pipe(function ($partitions) {
+                [$noSpaces, $withSpaces] = $partitions;
 
-        return $this->sortRecursive(array_replace_recursive($translations, $all));
+                $undotted = $noSpaces
+                    ->mapWithKeys(fn ($key) => [$key => ''])
+                    ->undot();
+
+                $spaced = $withSpaces
+                    ->mapWithKeys(fn ($key) => [$key => '']);
+
+                return $undotted + $spaced->toArray();
+            });
+
+        return Arr::sortRecursive(array_replace_recursive($translations, $newEntries));
     }
 }

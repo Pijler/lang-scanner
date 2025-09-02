@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Actions\Concerns\CheckScanner;
+use App\Actions\Concerns\UpdateScanner;
 use App\Actions\ElaborateSummary;
 use App\Actions\Scanner;
 use App\Commands\DefaultCommand;
@@ -49,7 +51,7 @@ class AppServiceProvider extends ServiceProvider
                 new ProgressOutput(
                     resolve(InputInterface::class),
                     resolve(OutputInterface::class),
-                )
+                ),
             );
         });
 
@@ -60,7 +62,35 @@ class AppServiceProvider extends ServiceProvider
                 new SummaryOutput(
                     resolve(InputInterface::class),
                     resolve(OutputInterface::class),
-                )
+                ),
+            );
+        });
+
+        $this->app->singleton(CheckScanner::class, function () {
+            $input = resolve(InputInterface::class);
+
+            return new CheckScanner(
+                Project::paths($input),
+                resolve(InputInterface::class),
+                resolve(OutputInterface::class),
+                new ProgressOutput(
+                    resolve(InputInterface::class),
+                    resolve(OutputInterface::class),
+                ),
+            );
+        });
+
+        $this->app->singleton(UpdateScanner::class, function () {
+            $input = resolve(InputInterface::class);
+
+            return new UpdateScanner(
+                Project::paths($input),
+                resolve(InputInterface::class),
+                resolve(OutputInterface::class),
+                new ProgressOutput(
+                    resolve(InputInterface::class),
+                    resolve(OutputInterface::class),
+                ),
             );
         });
     }

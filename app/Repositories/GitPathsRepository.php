@@ -48,7 +48,6 @@ class GitPathsRepository implements PathsRepository
             'committed' => tap(new Process(['git', 'diff', '--name-only', '--diff-filter=AM', "{$branch}...HEAD"]))->run(),
         ];
 
-        /** @var Collection<int, string> $files */
         $files = collect($files)->each(function (Process $process) {
             return abort_if(
                 boolean: ! $process->isSuccessful(),

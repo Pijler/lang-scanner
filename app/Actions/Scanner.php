@@ -13,19 +13,14 @@ use Symfony\Component\Console\Output\OutputInterface;
 class Scanner
 {
     /**
-     * The paths to scan.
+     * The total number of files scanned.
      */
-    protected array $paths;
+    protected int $totalFiles = 0;
 
     /**
      * The changes made during the scan.
      */
     protected array $changes = [];
-
-    /**
-     * The total number of files scanned.
-     */
-    protected int $totalFiles = 0;
 
     /**
      * Creates a new Scanner instance.
@@ -34,9 +29,7 @@ class Scanner
         protected InputInterface $input,
         protected OutputInterface $output,
         protected ProgressOutput $progressOutput,
-    ) {
-        $this->paths = Project::paths($input);
-    }
+    ) {}
 
     /**
      * Scanner the project resolved by the current input and output.
@@ -59,8 +52,7 @@ class Scanner
      */
     private function checked(array $config): bool
     {
-        return $this->input->getOption('check')
-            || (isset($config['check']) && $config['check']);
+        return $this->input->getOption('check') || data_get($config, 'check', false);
     }
 
     /**
@@ -78,13 +70,7 @@ class Scanner
      */
     private function checkScanner(array $config): void
     {
-        [$totalFiles, $changes] = (new CheckScanner(
-            config: $config,
-            input: $this->input,
-            paths: $this->paths,
-            output: $this->output,
-            progressOutput: $this->progressOutput,
-        ))->execute();
+        [$totalFiles, $changes] = resolve(CheckScanner::class)->execute($config);
 
         $this->totalFiles += $totalFiles;
         $this->changes = array_merge($this->changes, $changes);
@@ -95,13 +81,7 @@ class Scanner
      */
     private function updateScanner(array $config): void
     {
-        [$totalFiles, $changes] = (new UpdateScanner(
-            config: $config,
-            input: $this->input,
-            paths: $this->paths,
-            output: $this->output,
-            progressOutput: $this->progressOutput,
-        ))->execute();
+        [$totalFiles, $changes] = resolve(UpdateScanner::class)->execute($config);
 
         $this->totalFiles += $totalFiles;
         $this->changes = array_merge($this->changes, $changes);

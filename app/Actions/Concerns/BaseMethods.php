@@ -5,17 +5,29 @@ namespace App\Actions\Concerns;
 use Illuminate\Support\Facades\File;
 use Symfony\Component\Finder\SplFileInfo;
 
-/**
- * @property array $config
- */
 trait BaseMethods
 {
+    /**
+     * The configuration options for the scanner.
+     */
+    protected array $config = [];
+
+    /**
+     * The changes made during the scan.
+     */
+    protected array $changes = [];
+
+    /**
+     * The total number of files scanned.
+     */
+    protected int $totalFiles = 0;
+
     /**
      * Puts the content into the specified file.
      */
     protected function putContent(SplFileInfo $file, array $content): void
     {
-        $file->openFile('w')->fwrite(json_encode($content, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        File::put($file->getRealPath(), json_encode($content, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
     }
 
     /**
@@ -23,6 +35,8 @@ trait BaseMethods
      */
     protected function getFiles(): array
     {
+        abort_unless(isset($this->config['base_path'], $this->config['lang_path']), 'Config paths are not set.');
+
         return rescue(function () {
             return File::allFiles($this->config['base_path'].'/'.$this->config['lang_path']);
         }, [], false);
@@ -33,29 +47,9 @@ trait BaseMethods
      */
     protected function extractKeys(array $array): array
     {
-        $result = [];
-
-        foreach ($array as $key => $value) {
-            $result[$key] = is_array($value) ? $this->extractKeys($value) : '';
-        }
-
-        return $result;
-    }
-
-    /**
-     * Sorts a multi-dimensional array recursively.
-     */
-    protected function sortRecursive(array $array): array
-    {
-        ksort($array);
-
-        foreach ($array as &$value) {
-            if (is_array($value)) {
-                $value = $this->sortRecursive($value);
-            }
-        }
-
-        return $array;
+        return collect($array)->map(function ($value) {
+            return is_array($value) ? $this->extractKeys($value) : '';
+        })->all();
     }
 
     /**
@@ -63,8 +57,6 @@ trait BaseMethods
      */
     protected function getTranslations(): array
     {
-        abort_unless(isset($this->config['lang_path']), 'Language path is not set.');
-
         $files = $this->getFiles();
 
         return collect($files)
