@@ -159,7 +159,7 @@ class UpdateScanner
                 $spaced = $withSpaces
                     ->mapWithKeys(fn ($key) => [$key => '']);
 
-                return $undotted + $spaced->toArray();
+                return $undotted->toArray() + $spaced->toArray();
             });
 
         return Arr::sortRecursive(array_replace_recursive($translations, $newEntries));

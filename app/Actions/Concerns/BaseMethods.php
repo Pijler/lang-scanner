@@ -27,7 +27,9 @@ trait BaseMethods
      */
     protected function putContent(SplFileInfo $file, array $content): void
     {
-        File::put($file->getRealPath(), json_encode($content, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        if (filled($content)) {
+            File::put($file->getRealPath(), json_encode($content, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        }
     }
 
     /**

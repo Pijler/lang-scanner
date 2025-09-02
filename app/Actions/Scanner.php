@@ -72,8 +72,8 @@ class Scanner
     {
         [$totalFiles, $changes] = resolve(CheckScanner::class)->execute($config);
 
-        $this->totalFiles += $totalFiles;
-        $this->changes = array_merge($this->changes, $changes);
+        $this->changes = $changes;
+        $this->totalFiles = $totalFiles;
     }
 
     /**
@@ -83,7 +83,7 @@ class Scanner
     {
         [$totalFiles, $changes] = resolve(UpdateScanner::class)->execute($config);
 
-        $this->totalFiles += $totalFiles;
-        $this->changes = array_merge($this->changes, $changes);
+        $this->changes = $changes;
+        $this->totalFiles = $totalFiles;
     }
 }
