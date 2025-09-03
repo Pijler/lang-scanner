@@ -1,12 +1,12 @@
 <?php
 
-use Tests\TestCase;
 use App\Commands\DefaultCommand;
 use Illuminate\Foundation\Console\Kernel;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Output\OutputInterface;
+use Tests\TestCase;
 
 /*
 |--------------------------------------------------------------------------

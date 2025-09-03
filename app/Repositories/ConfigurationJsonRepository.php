@@ -10,7 +10,7 @@ class ConfigurationJsonRepository
      * The default configuration values.
      */
     protected const array DEFAULT = [
-        'extensions' => [],
+        'extends' => [],
         'scanner' => [
             [
                 'lang_path' => 'lang/',
@@ -47,11 +47,11 @@ class ConfigurationJsonRepository
     }
 
     /**
-     * Get the file extensions to scan.
+     * Get the file extends to scan.
      */
-    public function extensions(): array
+    public function extends(): array
     {
-        return data_get($this->get(), 'extensions', []);
+        return data_get($this->get(), 'extends', []);
     }
 
     /**
