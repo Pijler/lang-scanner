@@ -1,5 +1,13 @@
 <?php
 
+use Tests\TestCase;
+use App\Commands\DefaultCommand;
+use Illuminate\Foundation\Console\Kernel;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\BufferedOutput;
+use Symfony\Component\Console\Output\OutputInterface;
+
 /*
 |--------------------------------------------------------------------------
 | Test Case
@@ -11,22 +19,7 @@
 |
 */
 
-uses(Tests\TestCase::class)->in('Feature');
-
-/*
-|--------------------------------------------------------------------------
-| Expectations
-|--------------------------------------------------------------------------
-|
-| When you're writing tests, you often need to check that values meet certain conditions. The
-| "expect()" function gives you access to a set of "expectations" methods that you can use
-| to assert different things. Of course, you may extend the Expectation API at any time.
-|
-*/
-
-expect()->extend('toBeOne', function () {
-    return $this->toBe(1);
-});
+uses(TestCase::class)->in('Feature');
 
 /*
 |--------------------------------------------------------------------------
@@ -39,7 +32,35 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something(): void
+/**
+ * Runs the given console command.
+ */
+function run(string $command, array $arguments): array
 {
-    // ..
+    [$input, $output] = console($command, $arguments);
+
+    $status = resolve(Kernel::class)->call($command, $arguments, $output);
+
+    dd($status, $output->fetch());
+
+    return [$status, $output];
+}
+
+/**
+ * Prepares the console input and output for the given command.
+ */
+function console(string $command, array $arguments): array
+{
+    $commandInstance = match ($command) {
+        'default' => resolve(DefaultCommand::class),
+    };
+
+    $output = new BufferedOutput(BufferedOutput::VERBOSITY_VERBOSE);
+
+    $input = new ArrayInput($arguments, $commandInstance->getDefinition());
+
+    app()->singleton(InputInterface::class, fn () => $input);
+    app()->singleton(OutputInterface::class, fn () => $output);
+
+    return [$input, $output];
 }
