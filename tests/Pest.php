@@ -19,7 +19,7 @@ use Tests\TestCase;
 |
 */
 
-uses(TestCase::class)->in('Feature');
+uses(TestCase::class)->in('Unit', 'Feature');
 
 /*
 |--------------------------------------------------------------------------
@@ -41,9 +41,9 @@ function run(string $command, array $arguments): array
 
     $status = resolve(Kernel::class)->call($command, $arguments, $output);
 
-    dd($status, $output->fetch());
+    $display = $output->fetch();
 
-    return [$status, $output];
+    return [$status, $display];
 }
 
 /**

@@ -24,7 +24,6 @@
     },
     "require-dev": {
         "illuminate/view": "^11.45",
-        "larastan/larastan": "^3.6",
         "laravel-zero/framework": "^11.45",
         "laravel/pint": "^1.24",
         "mockery/mockery": "^1.6",
