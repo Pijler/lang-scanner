@@ -42,7 +42,7 @@ class CheckScanner
      */
     private function sorted(): bool
     {
-        return $this->input->getOption('sort') || data_get($this->config, 'sort', false);
+        return $this->config['sort'] ?? $this->input->getOption('sort');
     }
 
     /**
