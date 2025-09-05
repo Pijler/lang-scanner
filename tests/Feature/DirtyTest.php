@@ -2,7 +2,7 @@
 
 test('it should run default command (test-a)', function () {
     mockDirty([
-        base_path('tests/Fixtures/test-a/resources/app/app.blade.php'),
+        base_path('tests/Fixtures/test-a/resources/base/base.blade.php'),
     ]);
 
     [$status, $output] = run('default', [
@@ -14,16 +14,16 @@ test('it should run default command (test-a)', function () {
     expect($output)->toContain('SCANNED', '1 file, New 24 translations scanned');
 
     expect(getContent(base_path('tests/Fixtures/test-a/lang/en-US.json')))->toBe([
-        'App Description' => '',
-        'App Name' => '',
-        'App Version' => '',
-        'App. Description!' => '',
-        'App. Description.' => '',
-        'App. Name!' => '',
-        'App. Name.' => '',
-        'App. Version!' => '',
-        'App. Version.' => '',
-        'app' => [
+        'Base Description' => '',
+        'Base Name' => '',
+        'Base Version' => '',
+        'Base. Description!' => '',
+        'Base. Description.' => '',
+        'Base. Name!' => '',
+        'Base. Name.' => '',
+        'Base. Version!' => '',
+        'Base. Version.' => '',
+        'base' => [
             'description' => '',
             'name' => '',
             'version' => '',
@@ -31,16 +31,16 @@ test('it should run default command (test-a)', function () {
     ]);
 
     expect(getContent(base_path('tests/Fixtures/test-a/lang/pt-BR.json')))->toBe([
-        'App Description' => '',
-        'App Name' => '',
-        'App Version' => '',
-        'App. Description!' => '',
-        'App. Description.' => '',
-        'App. Name!' => '',
-        'App. Name.' => '',
-        'App. Version!' => '',
-        'App. Version.' => '',
-        'app' => [
+        'Base Description' => '',
+        'Base Name' => '',
+        'Base Version' => '',
+        'Base. Description!' => '',
+        'Base. Description.' => '',
+        'Base. Name!' => '',
+        'Base. Name.' => '',
+        'Base. Version!' => '',
+        'Base. Version.' => '',
+        'base' => [
             'description' => '',
             'name' => '',
             'version' => '',
@@ -50,7 +50,7 @@ test('it should run default command (test-a)', function () {
 
 test('it should run default command (test-b)', function () {
     mockDirty([
-        base_path('tests/Fixtures/test-b/resources/app/app.blade.php'),
+        base_path('tests/Fixtures/test-b/resources/base/base.blade.php'),
     ]);
 
     [$status, $output] = run('default', [
@@ -126,7 +126,7 @@ test('it should run default command (test-b)', function () {
 
 test('it should run default command (test-c)', function () {
     mockDirty([
-        base_path('tests/Fixtures/test-c/resources/app/app.blade.php'),
+        base_path('tests/Fixtures/test-c/resources/base/base.blade.php'),
     ]);
 
     [$status, $output] = run('default', [
@@ -202,7 +202,7 @@ test('it should run default command (test-c)', function () {
 
 test('it should run default command (test-d)', function () {
     mockDirty([
-        base_path('tests/Fixtures/test-d/resources/app/app.blade.php'),
+        base_path('tests/Fixtures/test-d/resources/base/base.blade.php'),
     ]);
 
     [$status, $output] = run('default', [
@@ -278,7 +278,7 @@ test('it should run default command (test-d)', function () {
 
 test('it should run default command (test-e)', function () {
     mockDirty([
-        base_path('tests/Fixtures/test-e/resources/app/app.blade.php'),
+        base_path('tests/Fixtures/test-e/resources/base/base.blade.php'),
     ]);
 
     [$status, $output] = run('default', [
