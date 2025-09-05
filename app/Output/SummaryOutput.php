@@ -44,10 +44,6 @@ class SummaryOutput
                 'issue' => $issue,
                 'isVerbose' => $this->output->isVerbose(),
             ]));
-
-            if ($this->output->isVerbose() && $issue->code()) {
-                $this->output->writeln($issue->code());
-            }
         }
 
         $this->output->writeln('');
@@ -62,10 +58,10 @@ class SummaryOutput
             return $change['count'] > 0;
         })->map(fn ($change) => new Issue(
             path: Project::path(),
-            file: $change['file'],
-            count: $change['count'],
-            changes: $change['issues'],
-            check: isset($change['check']) && $change['check'],
+            file: data_get($change, 'file'),
+            count: data_get($change, 'count'),
+            changes: data_get($change, 'issues'),
+            check: data_get($change, 'check', false),
         ))->values();
     }
 }
