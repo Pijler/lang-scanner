@@ -32,9 +32,13 @@ uses(TestCase::class)->in('Unit', 'Feature');
 uses()->beforeEach(function () use ($fixturesPath, $tempBackupPath) {
     File::ensureDirectoryExists($tempBackupPath);
 
-    blank(File::allFiles($tempBackupPath))
-        ? File::copyDirectory($fixturesPath, $tempBackupPath)
-        : File::copyDirectory($tempBackupPath, $fixturesPath);
+    File::copyDirectory($fixturesPath, $tempBackupPath);
+})->in('Unit', 'Feature');
+
+uses()->afterEach(function () use ($fixturesPath, $tempBackupPath) {
+    File::ensureDirectoryExists($tempBackupPath);
+
+    File::copyDirectory($tempBackupPath, $fixturesPath);
 })->in('Unit', 'Feature');
 
 /*
