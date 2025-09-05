@@ -52,7 +52,7 @@ class Scanner
      */
     private function checked(array $config): bool
     {
-        return $this->config['check'] ?? $this->input->getOption('check');
+        return $config['check'] ?? $this->input->getOption('check');
     }
 
     /**

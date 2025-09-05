@@ -50,8 +50,8 @@ class GitPathsRepository implements PathsRepository
 
         $files = collect($files)->each(function (Process $process) {
             return abort_if(
-                boolean: ! $process->isSuccessful(),
                 code: 1,
+                boolean: ! $process->isSuccessful(),
                 message: 'The [--diff] option is only available when using Git.',
             );
         })->map(function (Process $process) {

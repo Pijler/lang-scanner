@@ -31,7 +31,7 @@ class SummaryOutput
     {
         renderUsing($this->output);
 
-        $issues = $this->getIssues(Project::path(), $changes);
+        $issues = $this->getIssues($changes);
 
         render((string) view('summary', [
             'issues' => $issues,
@@ -56,12 +56,12 @@ class SummaryOutput
     /**
      * Gets the list of issues from the given changes.
      */
-    public function getIssues(string $path, array $changes): Collection
+    public function getIssues(array $changes): Collection
     {
         return collect($changes)->filter(function ($change) {
             return $change['count'] > 0;
         })->map(fn ($change) => new Issue(
-            path: $path,
+            path: Project::path(),
             file: $change['file'],
             count: $change['count'],
             changes: $change['issues'],

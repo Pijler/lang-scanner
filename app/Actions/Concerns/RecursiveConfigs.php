@@ -62,7 +62,7 @@ class RecursiveConfigs
         $extends = $this->repository->extends();
 
         return collect($extends)->map(function (string $extension) {
-            $path = $this->getBasePath().'/'.$extension;
+            $path = $this->getBasePath().'/'.trim($extension, '/');
 
             return (new RecursiveConfigs($path))->execute();
         })->toArray();

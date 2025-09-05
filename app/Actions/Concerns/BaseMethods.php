@@ -37,7 +37,11 @@ trait BaseMethods
      */
     protected function getFiles(): array
     {
-        abort_unless(isset($this->config['base_path'], $this->config['lang_path']), 'Config paths are not set.');
+        abort_unless(
+            code: 1,
+            message: 'Config paths are not set.',
+            boolean: isset($this->config['base_path'], $this->config['lang_path']),
+        );
 
         return rescue(function () {
             return File::allFiles($this->config['base_path'].'/'.$this->config['lang_path']);
