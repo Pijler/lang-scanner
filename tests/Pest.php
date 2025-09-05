@@ -4,11 +4,16 @@ use App\Actions\Concerns\RecursiveConfigs;
 use App\Commands\DefaultCommand;
 use Illuminate\Foundation\Console\Kernel;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\File;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Tests\TestCase;
+
+$fixturesPath = __DIR__.'/Fixtures';
+
+$tempBackupPath = __DIR__.'/../../storage/app/temp-backup';
 
 /*
 |--------------------------------------------------------------------------
@@ -22,6 +27,14 @@ use Tests\TestCase;
 */
 
 uses(TestCase::class)->in('Unit', 'Feature');
+
+uses()->beforeEach(function () use ($fixturesPath, $tempBackupPath) {
+    File::ensureDirectoryExists($tempBackupPath);
+
+    blank(File::allFiles($tempBackupPath))
+        ? File::copyDirectory($fixturesPath, $tempBackupPath)
+        : File::copyDirectory($tempBackupPath, $fixturesPath);
+})->in('Unit', 'Feature');
 
 /*
 |--------------------------------------------------------------------------
@@ -65,6 +78,16 @@ function console(string $command, array $arguments): array
     app()->singleton(OutputInterface::class, fn () => $output);
 
     return [$input, $output];
+}
+
+/**
+ * Get the JSON content from the given file path.
+ */
+function getContent(string $filePath): mixed
+{
+    $content = File::get($filePath);
+
+    return json_decode($content, true);
 }
 
 /**
