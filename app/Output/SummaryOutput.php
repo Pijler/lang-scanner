@@ -31,7 +31,7 @@ class SummaryOutput
     {
         renderUsing($this->output);
 
-        $issues = $this->getIssues(Project::path(), $changes);
+        $issues = $this->getIssues($changes);
 
         render((string) view('summary', [
             'issues' => $issues,
@@ -44,10 +44,6 @@ class SummaryOutput
                 'issue' => $issue,
                 'isVerbose' => $this->output->isVerbose(),
             ]));
-
-            if ($this->output->isVerbose() && $issue->code()) {
-                $this->output->writeln($issue->code());
-            }
         }
 
         $this->output->writeln('');
@@ -56,16 +52,16 @@ class SummaryOutput
     /**
      * Gets the list of issues from the given changes.
      */
-    public function getIssues(string $path, array $changes): Collection
+    public function getIssues(array $changes): Collection
     {
         return collect($changes)->filter(function ($change) {
             return $change['count'] > 0;
         })->map(fn ($change) => new Issue(
-            path: $path,
-            file: $change['file'],
-            count: $change['count'],
-            changes: $change['issues'],
-            check: isset($change['check']) && $change['check'],
+            path: Project::path(),
+            file: data_get($change, 'file'),
+            count: data_get($change, 'count'),
+            changes: data_get($change, 'issues'),
+            check: data_get($change, 'check', false),
         ))->values();
     }
 }

@@ -1,5 +1,21 @@
 <?php
 
+use App\Actions\Concerns\RecursiveConfigs;
+use App\Commands\DefaultCommand;
+use App\Contracts\PathsRepository;
+use Illuminate\Foundation\Console\Kernel;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\File;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\BufferedOutput;
+use Symfony\Component\Console\Output\OutputInterface;
+use Tests\TestCase;
+
+$fixturesPath = __DIR__.'/Fixtures';
+
+$tempBackupPath = __DIR__.'/../../storage/app/temp-backup';
+
 /*
 |--------------------------------------------------------------------------
 | Test Case
@@ -11,22 +27,19 @@
 |
 */
 
-uses(Tests\TestCase::class)->in('Feature');
+uses(TestCase::class)->in('Unit', 'Feature');
 
-/*
-|--------------------------------------------------------------------------
-| Expectations
-|--------------------------------------------------------------------------
-|
-| When you're writing tests, you often need to check that values meet certain conditions. The
-| "expect()" function gives you access to a set of "expectations" methods that you can use
-| to assert different things. Of course, you may extend the Expectation API at any time.
-|
-*/
+uses()->beforeEach(function () use ($fixturesPath, $tempBackupPath) {
+    File::ensureDirectoryExists($tempBackupPath);
 
-expect()->extend('toBeOne', function () {
-    return $this->toBe(1);
-});
+    File::copyDirectory($fixturesPath, $tempBackupPath);
+})->in('Unit', 'Feature');
+
+uses()->afterEach(function () use ($fixturesPath, $tempBackupPath) {
+    File::ensureDirectoryExists($tempBackupPath);
+
+    File::copyDirectory($tempBackupPath, $fixturesPath);
+})->in('Unit', 'Feature');
 
 /*
 |--------------------------------------------------------------------------
@@ -39,7 +52,79 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something(): void
+/**
+ * Runs the given console command.
+ */
+function run(string $command, array $arguments): array
 {
-    // ..
+    [$input, $output] = console($command, $arguments);
+
+    $status = resolve(Kernel::class)->call($command, $arguments, $output);
+
+    $display = $output->fetch();
+
+    return [$status, $display];
+}
+
+/**
+ * Prepares the console input and output for the given command.
+ */
+function console(string $command, array $arguments): array
+{
+    $commandInstance = match ($command) {
+        'default' => resolve(DefaultCommand::class),
+    };
+
+    $output = new BufferedOutput(BufferedOutput::VERBOSITY_VERBOSE);
+
+    $input = new ArrayInput($arguments, $commandInstance->getDefinition());
+
+    app()->singleton(InputInterface::class, fn () => $input);
+    app()->singleton(OutputInterface::class, fn () => $output);
+
+    return [$input, $output];
+}
+
+/**
+ * Mocks the PathsRepository to return the given paths for the diff method.
+ */
+function mockDiff(array $paths): void
+{
+    $mock = mock(PathsRepository::class);
+
+    $mock->shouldReceive('diff')->once()->andReturn($paths);
+
+    app()->instance(PathsRepository::class, $mock);
+}
+
+/**
+ * Mocks the PathsRepository to return the given paths for the dirty method.
+ */
+function mockDirty(array $paths): void
+{
+    $mock = mock(PathsRepository::class);
+
+    $mock->shouldReceive('dirty')->once()->andReturn($paths);
+
+    app()->instance(PathsRepository::class, $mock);
+}
+
+/**
+ * Get the JSON content from the given file path.
+ */
+function getContent(string $filePath): mixed
+{
+    $content = File::get($filePath);
+
+    return json_decode($content, true);
+}
+
+/**
+ * Get the scanner configuration from the given path.
+ */
+function scannerConfig(string $path): array
+{
+    $configs = (new RecursiveConfigs($path))->execute();
+
+    return Arr::first($configs);
 }

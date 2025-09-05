@@ -77,9 +77,17 @@ class UpdateScanner
      */
     private function getFilesToScan(): Collection
     {
-        abort_unless(isset($this->config['paths']), 'Paths are not set.');
+        abort_unless(
+            code: 1,
+            message: 'Extensions are not set.',
+            boolean: isset($this->config['extensions']),
+        );
 
-        abort_unless(isset($this->config['extensions']), 'Extensions are not set.');
+        abort_unless(
+            code: 1,
+            message: 'Config paths are not set.',
+            boolean: isset($this->config['base_path'], $this->config['lang_path']),
+        );
 
         return collect($this->config['paths'])
             ->map(function ($path) {
@@ -104,10 +112,16 @@ class UpdateScanner
     {
         $content = $file->getContents();
 
-        abort_unless(isset($this->config['methods']), 'Methods are not set in config.');
+        abort_unless(
+            code: 1,
+            boolean: isset($this->config['methods']),
+            message: 'Methods are not set in config.',
+        );
 
         return collect($this->config['methods'])->map(function ($method) {
-            return '/\\b'.preg_quote($method, '/')."\\s*\\(\\s*['\"]([^'\"]+)['\"]\\s*[\\),]/";
+            $pattern = preg_quote($method, '/');
+
+            return "/\\b{$pattern}\\s*\\(\\s*['\"]([^'\"]+)['\"]\\s*[\\),]/";
         })->flatMap(function ($pattern) use ($content) {
             preg_match_all($pattern, $content, $matches);
 

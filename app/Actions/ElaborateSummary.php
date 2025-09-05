@@ -35,6 +35,10 @@ class ElaborateSummary
      */
     private function countIssues(array $changes): int
     {
-        return collect($changes)->sum(fn ($change) => $change['count']);
+        return collect($changes)->filter(function ($change) {
+            return data_get($change, 'check', true);
+        })->sum(function ($change) {
+            return data_get($change, 'count', 0);
+        });
     }
 }

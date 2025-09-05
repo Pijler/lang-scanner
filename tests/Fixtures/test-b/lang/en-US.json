@@ -1,0 +1,16 @@
+{
+    "App Description": "App Description",
+    "App Name": "App Name",
+    "App Version": "App Version",
+    "App. Description!": "App. Description!",
+    "App. Description.": "App. Description.",
+    "App. Name!": "App. Name!",
+    "App. Name.": "App. Name.",
+    "App. Version!": "App. Version!",
+    "App. Version.": "App. Version.",
+    "app": {
+        "description": "app.description",
+        "name": "app.name",
+        "version": "app.version"
+    }
+}

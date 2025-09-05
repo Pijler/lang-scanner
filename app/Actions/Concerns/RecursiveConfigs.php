@@ -27,9 +27,9 @@ class RecursiveConfigs
     public function execute(): array
     {
         $scanner = $this->getScanner();
-        $extensions = $this->getExtensions();
+        $extends = $this->getExtends();
 
-        return array_merge($scanner, ...$extensions);
+        return array_merge($scanner, ...$extends);
     }
 
     /**
@@ -55,14 +55,14 @@ class RecursiveConfigs
     }
 
     /**
-     * Get the extensions configuration.
+     * Get the extends configuration.
      */
-    private function getExtensions(): array
+    private function getExtends(): array
     {
-        $extensions = $this->repository->extensions();
+        $extends = $this->repository->extends();
 
-        return collect($extensions)->map(function (string $extension) {
-            $path = $this->getBasePath().'/'.$extension;
+        return collect($extends)->map(function (string $extension) {
+            $path = $this->getBasePath().'/'.trim($extension, '/');
 
             return (new RecursiveConfigs($path))->execute();
         })->toArray();
