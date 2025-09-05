@@ -6,7 +6,7 @@ test('it should run default command (test-a)', function () {
     ]);
 
     expect($status)->toBe(1);
-    expect($output)->toContain('SCANNED', 'New 48 translations scanned');
+    expect($output)->toContain('SCANNED', '2 files, New 48 translations scanned');
 
     expect(getContent(base_path('tests/Fixtures/test-a/lang/en-US.json')))->toBe([
         'App Description' => '',
@@ -77,7 +77,7 @@ test('it should run default command (test-b)', function () {
     ]);
 
     expect($status)->toBe(1);
-    expect($output)->toContain('SCANNED', 'New 24 translations scanned');
+    expect($output)->toContain('SCANNED', '2 files, New 24 translations scanned');
 
     expect(getContent(base_path('tests/Fixtures/test-b/lang/en-US.json')))->toBe([
         'App Description' => 'App Description',
