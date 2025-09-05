@@ -2,6 +2,7 @@
 
 use App\Actions\Concerns\RecursiveConfigs;
 use App\Commands\DefaultCommand;
+use App\Contracts\PathsRepository;
 use Illuminate\Foundation\Console\Kernel;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
@@ -78,6 +79,30 @@ function console(string $command, array $arguments): array
     app()->singleton(OutputInterface::class, fn () => $output);
 
     return [$input, $output];
+}
+
+/**
+ * Mocks the PathsRepository to return the given paths for the diff method.
+ */
+function mockDiff(array $paths): void
+{
+    $mock = mock(PathsRepository::class);
+
+    $mock->shouldReceive('diff')->once()->andReturn($paths);
+
+    app()->instance(PathsRepository::class, $mock);
+}
+
+/**
+ * Mocks the PathsRepository to return the given paths for the dirty method.
+ */
+function mockDirty(array $paths): void
+{
+    $mock = mock(PathsRepository::class);
+
+    $mock->shouldReceive('dirty')->once()->andReturn($paths);
+
+    app()->instance(PathsRepository::class, $mock);
 }
 
 /**
