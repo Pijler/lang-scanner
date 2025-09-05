@@ -23,7 +23,7 @@ abstract class TestCase extends BaseTestCase
     /**
      * Call protected / private method of a class.
      */
-    public function invokeMethod(mixed $object, string $method, mixed $parameters = null): mixed
+    public function callMethod(mixed $object, string $method, mixed $parameters = null): mixed
     {
         $reflection = new ReflectionClass(get_class($object));
 
@@ -35,7 +35,7 @@ abstract class TestCase extends BaseTestCase
     /**
      * Get protected / private property of a class.
      */
-    public function invokeProperty(mixed $object, string $property): mixed
+    public function callProperty(mixed $object, string $property): mixed
     {
         $reflection = new ReflectionClass(get_class($object));
 

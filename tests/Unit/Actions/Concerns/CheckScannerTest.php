@@ -51,30 +51,30 @@ test('it should return current translations', function () {
 
     $translations = $this->callMethod($checkScanner, 'currentTranslations', [
         [
-            'name' => 'John',
+            'name' => 'Name',
             'email' => '',
             'address' => [
-                'street' => '123 Main St',
-                'city' => null,
-                'zip' => '12345',
+                'street' => 'Address Street',
+                'city' => '',
+                'zip' => 'Address Zip',
             ],
             'phones' => [
                 'home' => '',
-                'work' => '555-1234',
+                'work' => 'Work Phone',
             ],
         ],
     ]);
 
     expect($translations)->toBeArray();
-    expect($translations)->toContain(
-        'name',
-        'email',
-        'phones.home',
-        'phones.work',
-        'address.zip',
-        'address.city',
-        'address.street',
-    );
+    expect($translations)->toBe([
+        0 => 'name',
+        1 => 'email',
+        2 => 'address.street',
+        3 => 'address.city',
+        4 => 'address.zip',
+        5 => 'phones.home',
+        6 => 'phones.work',
+    ]);
 
     app()->forgetInstance(CheckScanner::class);
 
@@ -84,25 +84,25 @@ test('it should return current translations', function () {
 
     $translations = $this->callMethod($checkScanner, 'currentTranslations', [
         [
-            'name' => 'John',
+            'name' => 'Name',
             'email' => '',
             'address' => [
-                'street' => '123 Main St',
-                'city' => null,
-                'zip' => '12345',
+                'street' => 'Address Street',
+                'city' => '',
+                'zip' => 'Address Zip',
             ],
             'phones' => [
                 'home' => '',
-                'work' => '555-1234',
+                'work' => 'Work Phone',
             ],
         ],
     ]);
 
     expect($translations)->toBeArray();
-    expect($translations)->toContain(
-        'name',
-        'phones.work',
-        'address.zip',
-        'address.street',
-    );
+    expect($translations)->toBe([
+        0 => 'name',
+        1 => 'address.street',
+        2 => 'address.zip',
+        3 => 'phones.work',
+    ]);
 });

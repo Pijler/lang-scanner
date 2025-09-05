@@ -1,0 +1,6 @@
+{
+    "extends": [
+        "/module1/scanner.json",
+        "/module2/scanner.json"
+    ]
+}

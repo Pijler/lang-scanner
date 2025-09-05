@@ -1,7 +1,9 @@
 <?php
 
+use App\Actions\Concerns\RecursiveConfigs;
 use App\Commands\DefaultCommand;
 use Illuminate\Foundation\Console\Kernel;
+use Illuminate\Support\Arr;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\BufferedOutput;
@@ -63,4 +65,14 @@ function console(string $command, array $arguments): array
     app()->singleton(OutputInterface::class, fn () => $output);
 
     return [$input, $output];
+}
+
+/**
+ * Get the scanner configuration from the given path.
+ */
+function scannerConfig(string $path): array
+{
+    $configs = (new RecursiveConfigs($path))->execute();
+
+    return Arr::first($configs);
 }
