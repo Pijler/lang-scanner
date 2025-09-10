@@ -13,19 +13,19 @@ use Symfony\Component\Console\Output\OutputInterface;
 class Scanner
 {
     /**
-     * The total number of files scanned.
+     * The stats of scanned files and changes.
      */
-    protected int $totalFiles = 0;
-
-    /**
-     * The changes made during the scan.
-     */
-    protected array $changes = [];
+    protected array $stats = [
+        'check' => ['files' => 0, 'changes' => []],
+        'update' => ['files' => 0, 'changes' => []],
+    ];
 
     /**
      * Creates a new Scanner instance.
      */
     public function __construct(
+        protected CheckScanner $check,
+        protected UpdateScanner $update,
         protected InputInterface $input,
         protected OutputInterface $output,
         protected ProgressOutput $progressOutput,
@@ -39,12 +39,15 @@ class Scanner
         $configs = $this->getConfigs();
 
         collect($configs)->each(function (array $config) {
-            $this->checked($config)
-                ? $this->checkScanner($config)
-                : $this->updateScanner($config);
+            $mode = $this->checked($config) ? 'check' : 'update';
+
+            $this->runScanner($mode, $config);
         });
 
-        return [$this->totalFiles, $this->changes];
+        return [
+            collect($this->stats)->pluck('files')->sum(),
+            collect($this->stats)->pluck('changes')->collapse()->toArray(),
+        ];
     }
 
     /**
@@ -66,24 +69,16 @@ class Scanner
     }
 
     /**
-     * Check the project for translation issues.
+     * Run the correct scanner (check/update).
      */
-    private function checkScanner(array $config): void
+    private function runScanner(string $mode, array $config): void
     {
-        [$totalFiles, $changes] = resolve(CheckScanner::class)->execute($config);
+        [$files, $changes] = match ($mode) {
+            'check' => $this->check->execute($config),
+            'update' => $this->update->execute($config),
+        };
 
-        $this->changes = $changes;
-        $this->totalFiles = $totalFiles;
-    }
-
-    /**
-     * Update the project with new translations.
-     */
-    private function updateScanner(array $config): void
-    {
-        [$totalFiles, $changes] = resolve(UpdateScanner::class)->execute($config);
-
-        $this->changes = $changes;
-        $this->totalFiles = $totalFiles;
+        data_set($this->stats, "{$mode}.files", $files);
+        data_set($this->stats, "{$mode}.changes", $changes);
     }
 }

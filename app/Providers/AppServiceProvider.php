@@ -46,6 +46,8 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(Scanner::class, function () {
             return new Scanner(
+                resolve(CheckScanner::class),
+                resolve(UpdateScanner::class),
                 resolve(InputInterface::class),
                 resolve(OutputInterface::class),
                 new ProgressOutput(

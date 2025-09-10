@@ -92,7 +92,7 @@ function mockDiff(array $paths): void
 {
     $mock = mock(PathsRepository::class);
 
-    $mock->shouldReceive('diff')->once()->andReturn($paths);
+    $mock->shouldReceive('diff')->twice()->andReturn($paths);
 
     app()->instance(PathsRepository::class, $mock);
 }
@@ -104,7 +104,7 @@ function mockDirty(array $paths): void
 {
     $mock = mock(PathsRepository::class);
 
-    $mock->shouldReceive('dirty')->once()->andReturn($paths);
+    $mock->shouldReceive('dirty')->twice()->andReturn($paths);
 
     app()->instance(PathsRepository::class, $mock);
 }
