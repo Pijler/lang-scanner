@@ -31,11 +31,21 @@ class UpdateScanner
      */
     public function execute(array $config): array
     {
-        $collectedKeys = [];
-
         $this->config = $config;
 
         $files = $this->getFilesToScan();
+
+        $this->updateTranslations($files);
+
+        return [$this->totalFiles, $this->changes];
+    }
+
+    /**
+     * Update translations based on collected keys from files.
+     */
+    private function updateTranslations(Collection $files): void
+    {
+        $collectedKeys = [];
 
         $translations = $this->getTranslations();
 
@@ -54,8 +64,6 @@ class UpdateScanner
         if (filled($newTranslations)) {
             $this->addNewTranslations($newTranslations);
         }
-
-        return [$this->totalFiles, $this->changes];
     }
 
     /**
