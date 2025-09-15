@@ -37,6 +37,20 @@ class AppServiceProvider extends ServiceProvider
             );
         });
 
+        $this->app->singleton(SummaryOutput::class, function () {
+            return new SummaryOutput(
+                resolve(InputInterface::class),
+                resolve(OutputInterface::class),
+            );
+        });
+
+        $this->app->singleton(ProgressOutput::class, function () {
+            return new ProgressOutput(
+                resolve(InputInterface::class),
+                resolve(OutputInterface::class),
+            );
+        });
+
         $this->app->bindMethod([DefaultCommand::class, 'handle'], function ($command) {
             return $command->handle(
                 resolve(Scanner::class),
@@ -50,10 +64,7 @@ class AppServiceProvider extends ServiceProvider
                 resolve(UpdateScanner::class),
                 resolve(InputInterface::class),
                 resolve(OutputInterface::class),
-                new ProgressOutput(
-                    resolve(InputInterface::class),
-                    resolve(OutputInterface::class),
-                ),
+                resolve(ProgressOutput::class),
             );
         });
 
@@ -61,10 +72,7 @@ class AppServiceProvider extends ServiceProvider
             return new ElaborateSummary(
                 resolve(InputInterface::class),
                 resolve(OutputInterface::class),
-                new SummaryOutput(
-                    resolve(InputInterface::class),
-                    resolve(OutputInterface::class),
-                ),
+                resolve(SummaryOutput::class),
             );
         });
 
@@ -75,10 +83,7 @@ class AppServiceProvider extends ServiceProvider
                 Project::paths($input),
                 resolve(InputInterface::class),
                 resolve(OutputInterface::class),
-                new ProgressOutput(
-                    resolve(InputInterface::class),
-                    resolve(OutputInterface::class),
-                ),
+                resolve(ProgressOutput::class),
             );
         });
 
@@ -89,10 +94,7 @@ class AppServiceProvider extends ServiceProvider
                 Project::paths($input),
                 resolve(InputInterface::class),
                 resolve(OutputInterface::class),
-                new ProgressOutput(
-                    resolve(InputInterface::class),
-                    resolve(OutputInterface::class),
-                ),
+                resolve(ProgressOutput::class),
             );
         });
     }

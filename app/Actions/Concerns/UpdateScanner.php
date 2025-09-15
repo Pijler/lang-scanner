@@ -129,11 +129,11 @@ class UpdateScanner
         return collect($this->config['methods'])->map(function ($method) {
             $pattern = preg_quote($method, '/');
 
-            return "/\\b{$pattern}\\s*\\(\\s*['\"]([^'\"]+)['\"]\\s*[\\),]/";
+            return "/\\b{$pattern}\\s*\\(\\s*(['\"])((?:\\\\.|(?!\\1).)*?)\\1\\s*[\\),]/";
         })->flatMap(function ($pattern) use ($content) {
             preg_match_all($pattern, $content, $matches);
 
-            return $matches[1] ?? [];
+            return $matches[2] ?? [];
         })->filter()->unique()->values()->toArray();
     }
 
