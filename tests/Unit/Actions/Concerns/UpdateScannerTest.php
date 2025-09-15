@@ -231,4 +231,34 @@ test('it should return new translations', function () {
             'work' => 'Work Phone',
         ],
     ]);
+
+    $updateScanner = resolve(UpdateScanner::class);
+
+    $translations = [
+        'An app? Yes, an app!' => '',
+        'Click the ":action" button to open the app.' => 'Click the ":action" button to open the app.',
+        "Don't forget to update your app." => '',
+        "If you're enjoying this app, please leave a review!" => "If you're enjoying this app, please leave a review!",
+        "The app's performance can't be beat." => '',
+        'The app, as you know, is great.' => 'The app, as you know, is great.',
+    ];
+    $collectedKeys = [
+        'The app, as you know, is great.',
+        'Click the \":action\" button to open the app.',
+        'An app? Yes, an app!',
+        "The app's performance can't be beat.",
+        "Don't forget to update your app.",
+        "If you're enjoying this app, please leave a review!",
+    ];
+
+    $keys = $this->callMethod($updateScanner, 'returnNewTranslations', [$translations, $collectedKeys]);
+
+    expect($keys)->toBe([
+        'An app? Yes, an app!' => '',
+        'Click the ":action" button to open the app.' => 'Click the ":action" button to open the app.',
+        "Don't forget to update your app." => '',
+        "If you're enjoying this app, please leave a review!" => "If you're enjoying this app, please leave a review!",
+        "The app's performance can't be beat." => '',
+        'The app, as you know, is great.' => 'The app, as you know, is great.',
+    ]);
 });

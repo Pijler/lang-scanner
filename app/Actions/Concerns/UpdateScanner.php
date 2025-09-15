@@ -169,6 +169,7 @@ class UpdateScanner
     private function returnNewTranslations(array $translations, array $collectedKeys): array
     {
         $newEntries = collect($collectedKeys)
+            ->map(fn ($key) => stripslashes($key))
             ->reject(fn ($key) => Arr::has($translations, $key))
             ->partition(fn ($key) => ! str_contains($key, ' '))
             ->pipe(function ($partitions) {
