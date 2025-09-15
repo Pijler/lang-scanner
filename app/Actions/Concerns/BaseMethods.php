@@ -28,6 +28,8 @@ trait BaseMethods
     protected function putContent(SplFileInfo $file, array $content): void
     {
         if (filled($content)) {
+            $content = $this->deepStripslashes($content);
+
             File::put($file->getRealPath(), json_encode($content, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
         }
     }
@@ -46,6 +48,20 @@ trait BaseMethods
         return rescue(function () {
             return File::allFiles($this->config['base_path'].'/'.$this->config['lang_path']);
         }, [], false);
+    }
+
+    /**
+     * Recursively remove backslashes from array keys and string values.
+     */
+    protected function deepStripslashes(mixed $array): mixed
+    {
+        if (is_array($array)) {
+            return collect($array)->mapWithKeys(function ($value, $key) {
+                return [stripslashes($key) => $this->deepStripslashes($value)];
+            })->all();
+        }
+
+        return is_string($array) ? stripslashes($array) : $array;
     }
 
     /**
