@@ -135,6 +135,7 @@ test('it should run default command (test-c)', function () {
 
 test('it should run default command (test-d)', function () {
     [$status, $output] = run('default', [
+        '--sort' => false,
         '--check' => true,
         '--no-empty' => true,
         '--config' => base_path('tests/Fixtures/test-d/scanner.json'),

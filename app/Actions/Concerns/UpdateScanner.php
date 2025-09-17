@@ -185,6 +185,6 @@ class UpdateScanner
                 return $undotted->toArray() + $spaced->toArray();
             });
 
-        return Arr::sortRecursive(array_replace_recursive($translations, $newEntries));
+        return $this->sortArray(array_replace_recursive($translations, $newEntries));
     }
 }

@@ -4,8 +4,12 @@ namespace App\Actions\Concerns;
 
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Finder\SplFileInfo;
 
+/**
+ * @property InputInterface $input
+ */
 trait BaseMethods
 {
     /**
@@ -33,9 +37,37 @@ trait BaseMethods
     /**
      * Checks if the translations should be dotted.
      */
-    private function dotted(): bool
+    protected function dotted(): bool
     {
         return $this->config['dot'] ?? $this->input->getOption('dot');
+    }
+
+    /**
+     * Checks if the translations should be sorted.
+     */
+    protected function sorted(): bool
+    {
+        return $this->config['sort'] ?? $this->input->getOption('sort');
+    }
+
+    /**
+     * Checks if the translations should be sorted.
+     */
+    protected function sortArray(array $array): array
+    {
+        $sorted = $this->sorted();
+
+        return $sorted ? Arr::sortRecursive($array) : $array;
+    }
+
+    /**
+     * Extract only the keys from a multi-dimensional array.
+     */
+    protected function extractKeys(array $array): array
+    {
+        return collect($array)->map(function ($value) {
+            return is_array($value) ? $this->extractKeys($value) : '';
+        })->all();
     }
 
     /**
@@ -64,16 +96,6 @@ trait BaseMethods
         return rescue(function () {
             return File::allFiles($this->config['base_path'].'/'.$this->config['lang_path']);
         }, [], false);
-    }
-
-    /**
-     * Extract only the keys from a multi-dimensional array.
-     */
-    protected function extractKeys(array $array): array
-    {
-        return collect($array)->map(function ($value) {
-            return is_array($value) ? $this->extractKeys($value) : '';
-        })->all();
     }
 
     /**

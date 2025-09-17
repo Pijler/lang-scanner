@@ -4,7 +4,6 @@ namespace App\Actions\Concerns;
 
 use App\Enum\Status;
 use App\Output\ProgressOutput;
-use Illuminate\Support\Arr;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Finder\SplFileInfo;
@@ -37,12 +36,9 @@ class CheckScanner
         return [$this->totalFiles, $this->changes];
     }
 
-    /**
-     * Checks if the translations should be sorted.
-     */
-    private function sorted(): bool
+    protected function noUpdate(): bool
     {
-        return $this->config['sort'] ?? $this->input->getOption('sort');
+        return $this->config['no-update'] ?? $this->input->getOption('no-update');
     }
 
     /**
@@ -61,15 +57,13 @@ class CheckScanner
      */
     private function checkTranslations(array $translations): void
     {
-        $sort = $this->sorted();
-
         $files = $this->getFiles();
 
         collect($files)
             ->filter(function (SplFileInfo $file) {
                 return $file->getExtension() === 'json';
             })
-            ->map(function (SplFileInfo $file) use ($sort, $translations) {
+            ->map(function (SplFileInfo $file) use ($translations) {
                 $this->totalFiles++;
 
                 $content = json_decode($file->getContents(), true);
@@ -79,8 +73,8 @@ class CheckScanner
                     $this->currentTranslations($content),
                 );
 
-                if ($sort) {
-                    $this->putContent($file, Arr::sortRecursive($content));
+                if (! $this->noUpdate()) {
+                    $this->putContent($file, $this->sortArray($content));
                 }
 
                 $this->progressOutput->handle(blank($diff) ? Status::SKIPPED : Status::ERROR);
