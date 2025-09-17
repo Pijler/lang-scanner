@@ -53,7 +53,17 @@ trait BaseMethods
     /**
      * Checks if the translations should be sorted.
      */
-    protected function sortArray(array $array): array
+    private function dotArray(array $array): array
+    {
+        $dotted = $this->dotted();
+
+        return $dotted ? Arr::dot($array) : $array;
+    }
+
+    /**
+     * Checks if the translations should be sorted.
+     */
+    private function sortArray(array $array): array
     {
         $sorted = $this->sorted();
 
@@ -76,7 +86,9 @@ trait BaseMethods
     protected function putContent(SplFileInfo $file, array $content): void
     {
         if (filled($content)) {
-            $content = $this->dotted() ? Arr::dot($content) : $content;
+            $content = $this->dotArray($content);
+
+            $content = $this->sortArray($content);
 
             File::put($file->getRealPath(), json_encode($content, $this->flags));
         }
