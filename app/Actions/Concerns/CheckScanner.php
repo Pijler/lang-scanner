@@ -74,7 +74,7 @@ class CheckScanner
                 );
 
                 if (! $this->noUpdate()) {
-                    $this->putContent($file, $this->sortArray($content));
+                    $this->putContent($file, $content);
                 }
 
                 $this->progressOutput->handle(blank($diff) ? Status::SKIPPED : Status::ERROR);
