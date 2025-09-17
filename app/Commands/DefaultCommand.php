@@ -27,6 +27,7 @@ class DefaultCommand extends Command
         parent::configure();
 
         $this->setDefinition([
+            new InputOption('dot', '', InputOption::VALUE_NONE, 'Output the translation tree in DOT format'),
             new InputOption('sort', '', InputOption::VALUE_NONE, 'Sort the translations by key in check mode'),
             new InputOption('config', '', InputOption::VALUE_REQUIRED, 'The configuration that should be used'),
             new InputOption('check', '', InputOption::VALUE_NONE, 'Check if all translations in same folder have the same keys, and the same order'),

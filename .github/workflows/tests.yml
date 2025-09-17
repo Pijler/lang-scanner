@@ -1,4 +1,4 @@
-name: Validator Docs Tests
+name: Lang Scanner Tests
 
 on:
   push:
