@@ -145,6 +145,10 @@ Use `extends` to reuse configs across modules:
 -   Enable `sort` for clean, ordered JSON files.
 -   Centralize shared configs with `extends`.
 
+Any improvement or correction can open a PR or Issue.
+
 ### 📝 License
 
 Open-source under the [MIT license](LICENSE).
+
+## 🚀 Thanks!
