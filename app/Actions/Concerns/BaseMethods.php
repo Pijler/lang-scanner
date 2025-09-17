@@ -2,6 +2,7 @@
 
 namespace App\Actions\Concerns;
 
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
 use Symfony\Component\Finder\SplFileInfo;
 
@@ -30,11 +31,21 @@ trait BaseMethods
         | JSON_UNESCAPED_SLASHES;
 
     /**
+     * Checks if the translations should be dotted.
+     */
+    private function dotted(): bool
+    {
+        return $this->config['dot'] ?? $this->input->getOption('dot');
+    }
+
+    /**
      * Puts the content into the specified file.
      */
     protected function putContent(SplFileInfo $file, array $content): void
     {
         if (filled($content)) {
+            $content = $this->dotted() ? Arr::dot($content) : $content;
+
             File::put($file->getRealPath(), json_encode($content, $this->flags));
         }
     }
