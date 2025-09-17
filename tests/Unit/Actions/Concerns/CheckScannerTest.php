@@ -2,46 +2,46 @@
 
 use App\Actions\Concerns\CheckScanner;
 
-test('it should check default sorting as false', function () {
+test('it should check default no-updating as false', function () {
     console('default', []);
 
     $checkScanner = resolve(CheckScanner::class);
 
-    expect($this->callMethod($checkScanner, 'sorted'))->toBeFalse();
+    expect($this->callMethod($checkScanner, 'noUpdate'))->toBeFalse();
 });
 
-test('it should check if sorting is enabled via option', function () {
+test('it should check if no-updating is enabled via option', function () {
     console('default', []);
 
     $checkScanner = resolve(CheckScanner::class);
 
     $this->setProperty($checkScanner, 'config', [
-        'sort' => true,
+        'no-update' => true,
     ]);
 
-    expect($this->callMethod($checkScanner, 'sorted'))->toBeTrue();
+    expect($this->callMethod($checkScanner, 'noUpdate'))->toBeTrue();
 
     $this->setProperty($checkScanner, 'config', [
-        'sort' => false,
+        'no-update' => false,
     ]);
 
-    expect($this->callMethod($checkScanner, 'sorted'))->toBeFalse();
+    expect($this->callMethod($checkScanner, 'noUpdate'))->toBeFalse();
 });
 
-test('it should check if sorting is enabled via config', function () {
-    console('default', ['--sort' => true]);
+test('it should check if no-updating is enabled via config', function () {
+    console('default', ['--no-update' => true]);
 
     $checkScanner = resolve(CheckScanner::class);
 
-    expect($this->callMethod($checkScanner, 'sorted'))->toBeTrue();
+    expect($this->callMethod($checkScanner, 'noUpdate'))->toBeTrue();
 
     app()->forgetInstance(CheckScanner::class);
 
-    console('default', ['--sort' => false]);
+    console('default', ['--no-update' => false]);
 
     $checkScanner = resolve(CheckScanner::class);
 
-    expect($this->callMethod($checkScanner, 'sorted'))->toBeFalse();
+    expect($this->callMethod($checkScanner, 'noUpdate'))->toBeFalse();
 });
 
 test('it should return current translations', function () {
