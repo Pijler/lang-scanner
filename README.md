@@ -13,8 +13,9 @@ Although it’s a Laravel package, it’s flexible enough to scan translations f
 -   📂 Supports multiple paths and modules.
 -   🧩 Extensible via `extends` for modular configs.
 -   ✅ `check` ensures all language files have the same keys.
--   📑 `sort` keeps your JSON files ordered and consistent.
--   🚀 Integrates seamlessly into Laravel via Artisan commands.
+-   📑 `sort` automatically orders JSON keys globally (**enabled by default**).
+-   🔗 `--dot` saves translations in dot notation.
+-   🚫 `--no-update` skips updating JSON files when running `check` (verification only).
 
 ### 📦 Installation
 
@@ -82,13 +83,12 @@ Create a `scanner.json` file at the root of your Laravel project.
 }
 ```
 
-#### Example with `check` + `sort`:
+#### Example with `check`:
 
 ```json
 {
     "scanner": [
         {
-            "sort": true,
             "check": true,
             "lang_path": "lang/"
         }
@@ -109,24 +109,51 @@ The command will:
 -   Parse files defined in `paths` with the configured `extensions`.
 -   Detect translation calls based on the provided `methods`.
 -   Create or update JSON files inside `lang_path`.
--   Optionally run `check` and `sort` if enabled.
 
-#### 🔍 check – Ensure consistency
+### ⚡ CLI Options
 
-Checks that **all language JSON** files inside `lang_path` have the same keys.
+#### `--check`
 
-Example:
+Ensures that all language JSON files inside lang_path have the same keys.
 
--   lang/en.json contains "welcome".
--   lang/pt.json does not.
+Reports inconsistencies when a key exists in one locale but is missing in another.
 
-The scanner will report an inconsistency.
+```bash
+    ./vendor/bin/scanner --check
+```
 
-#### 📑 sort – Automatic ordering
+#### `--sort`
 
--   Can only be used together with check.
--   Sorts all JSON keys alphabetically.
--   Keeps diffs and pull requests clean and predictable.
+Sorts all JSON keys alphabetically.
+Enabled globally by default, can be disabled if needed:
+
+```bash
+    ./vendor/bin/scanner --sort=false
+```
+
+#### `--dot`
+
+Saves JSON translations in **dot notation**:
+
+```json
+{
+    "auth.failed": "These credentials do not match our records."
+}
+```
+
+```bash
+    ./vendor/bin/scanner --dot
+```
+
+#### `--no-update`
+
+When using check, prevents updating JSON files even if sort or dot are enabled.
+
+Useful for CI/CD validation pipelines.
+
+```bash
+    ./vendor/bin/scanner --check --no-update
+```
 
 ### 🧩 Extensibility with extends
 
@@ -134,7 +161,10 @@ Use `extends` to reuse configs across modules:
 
 ```json
 {
-    "extends": ["/packages/core/scanner.json", "/packages/admin/scanner.json"]
+    "extends": [
+        "/packages/core/scanner.json",
+        "/packages/admin/scanner.json"
+    ]
 }
 ```
 
@@ -142,7 +172,8 @@ Use `extends` to reuse configs across modules:
 
 -   Configure `methods` according to your framework (`__`/`trans` for Laravel, `t` for Vue/React).
 -   Always run with `check` in multi-language projects.
--   Enable `sort` for clean, ordered JSON files.
+-   Keep `sort` enabled for clean, ordered JSON files.
+-   Use `--no-update` in pipelines when you want validation only.
 -   Centralize shared configs with `extends`.
 
 Any improvement or correction can open a PR or Issue.
