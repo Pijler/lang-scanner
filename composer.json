@@ -1,14 +1,13 @@
 {
-    "name": "laravel/scanner",
-    "description": "An application for scanning files and updating translations.",
-    "keywords": ["php", "scanner", "translations"],
-    "homepage": "https://laravel.com",
+    "name": "pijler/lang-scanner",
     "type": "project",
+    "description": "An application for scanning files and updating translations.",
+    "keywords": [
+        "php",
+        "scanner",
+        "translations"
+    ],
     "license": "MIT",
-    "support": {
-        "issues": "https://github.com/laravel/scanner/issues",
-        "source": "https://github.com/laravel/scanner"
-    },
     "authors": [
         {
             "name": "João Pedro Lopes",
@@ -17,10 +16,7 @@
     ],
     "require": {
         "php": "^8.2",
-        "ext-json": "*",
-        "ext-mbstring": "*",
-        "ext-tokenizer": "*",
-        "ext-xml": "*"
+        "ext-json": "*"
     },
     "require-dev": {
         "illuminate/view": "^11.45",
@@ -50,7 +46,7 @@
             "pestphp/pest-plugin": true
         }
     },
-    "minimum-stability": "dev",
-    "prefer-stable": true,
-    "bin": ["builds/scanner"]
+    "minimum-stability": "stable",
+    "bin": ["builds/scanner"],
+    "prefer-stable": true
 }

@@ -6,9 +6,9 @@
 4. Compile the binary with
 
 ```zsh
-./scanner app:build
+php scanner app:build
 ```
 
 4. Commit all changes
 5. Push all commits to GitHub
-6. [Create a new GitHub release](https://github.com/laravel/scanner/releases/new) with the release notes
+6. [Create a new GitHub release](https://github.com/Pijler/lang-scanner/releases/new) with the release notes
