@@ -132,7 +132,9 @@ class UpdateScanner
             $end = preg_quote(data_get($pattern, 1, ''), '/');
             $start = preg_quote(data_get($pattern, 0, ''), '/');
 
-            return $end !== '' ? "/{$start}(.*?){$end}/s" : "/{$start}.*?['\"](.*?)['\"]/s";
+            return $end !== ''
+                ? "/(?<![A-Za-z0-9_]){$start}(.*?){$end}/s"
+                : "/(?<![A-Za-z0-9_]){$start}.*?['\"](.*?)['\"]/s";
         })->flatMap(function ($pattern) use ($content) {
             preg_match_all($pattern, $content, $matches);
 
