@@ -127,14 +127,51 @@ class UpdateScanner
         );
 
         return collect($this->config['methods'])->map(function ($method) {
-            $pattern = preg_quote($method, '/');
+            $pattern = explode('*', $method);
 
-            return "/\\b{$pattern}\\s*\\(\\s*(['\"])((?:\\\\.|(?!\\1).)*?)\\1\\s*[\\),]/";
+            $end = preg_quote(data_get($pattern, 1, ''), '/');
+            $start = preg_quote(data_get($pattern, 0, ''), '/');
+
+            return $end !== '' ? "/{$start}(.*?){$end}/s" : "/{$start}.*?['\"](.*?)['\"]/s";
         })->flatMap(function ($pattern) use ($content) {
             preg_match_all($pattern, $content, $matches);
 
-            return $matches[2] ?? [];
+            return $matches[1] ?? [];
+        })->filter()->map(function ($match) {
+            $match = trim($match);
+
+            $this->extractQuotedString($match);
+
+            return trim($match, " \t\n\r\0\x0B'\"");
         })->filter()->unique()->values()->toArray();
+    }
+
+    /**
+     * Extracts the "best" quoted string from a match.
+     */
+    private function extractQuotedString(string &$match): void
+    {
+        if (! preg_match_all('/([\'"])((?:\\\\.|(?!\1).)*?)\1/s', $match, $all, PREG_SET_ORDER)) {
+            return;
+        }
+
+        $best = collect($all)->reduce(function (?string $carry, array $m) {
+            $content = $m[2];
+
+            if ($content === '') {
+                return $carry;
+            }
+
+            if ($carry === null || strlen($content) > strlen($carry)) {
+                return $content;
+            }
+
+            return $carry;
+        });
+
+        if (filled($best)) {
+            $match = stripcslashes($best);
+        }
     }
 
     /**

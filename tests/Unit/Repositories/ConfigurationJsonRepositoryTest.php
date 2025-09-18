@@ -25,9 +25,9 @@ test('it should return the config content', function () {
                 1 => '.html',
             ],
             'methods' => [
-                0 => '__',
-                1 => 'trans',
-                2 => 'trans_choice',
+                0 => '__(*)',
+                1 => 'trans(*)',
+                2 => 'trans_choice(*)',
             ],
         ],
     ]);
@@ -51,9 +51,9 @@ test('it should return the config content', function () {
                 0 => '.php',
             ],
             'methods' => [
-                0 => '__',
-                1 => 'trans',
-                2 => 'trans_choice',
+                0 => '__(*)',
+                1 => 'trans(*)',
+                2 => 'trans_choice(*)',
             ],
         ],
     ]);
@@ -102,9 +102,9 @@ test('it should return the scanner config', function () {
                 1 => '.html',
             ],
             'methods' => [
-                0 => '__',
-                1 => 'trans',
-                2 => 'trans_choice',
+                0 => '__(*)',
+                1 => 'trans(*)',
+                2 => 'trans_choice(*)',
             ],
         ],
     ]);
