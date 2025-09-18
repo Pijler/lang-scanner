@@ -1,4 +1,6 @@
 <div>
+  {{ trans($test . 'app') }}
+  <br />
   {{ __('The app, as you know, is great.') }}
   <br />
   {{ trans_choice('An app? Yes, an app!', 1) }}

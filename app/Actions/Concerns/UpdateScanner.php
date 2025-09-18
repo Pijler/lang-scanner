@@ -142,19 +142,23 @@ class UpdateScanner
         })->filter()->map(function ($match) {
             $match = trim($match);
 
-            $this->extractQuotedString($match);
+            $match = $this->extractQuotedString($match);
 
-            return trim($match, " \t\n\r\0\x0B'\"");
+            return with($match, fn ($m) => trim($m, " \t\n\r\0\x0B'\""));
         })->filter()->unique()->values()->toArray();
     }
 
     /**
      * Extracts the "best" quoted string from a match.
      */
-    private function extractQuotedString(string &$match): void
+    private function extractQuotedString(string $match): ?string
     {
+        if (! str_starts_with($match, "'") && ! str_starts_with($match, '"')) {
+            return null;
+        }
+
         if (! preg_match_all('/([\'"])((?:\\\\.|(?!\1).)*?)\1/s', $match, $all, PREG_SET_ORDER)) {
-            return;
+            return null;
         }
 
         $best = collect($all)->reduce(function (?string $carry, array $m) {
@@ -171,9 +175,7 @@ class UpdateScanner
             return $carry;
         });
 
-        if (filled($best)) {
-            $match = stripcslashes($best);
-        }
+        return filled($best) ? stripcslashes($best) : null;
     }
 
     /**
