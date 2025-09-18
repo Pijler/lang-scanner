@@ -106,7 +106,7 @@ trait BaseMethods
         );
 
         return rescue(function () {
-            return File::allFiles($this->config['base_path'].'/'.$this->config['lang_path']);
+            return File::files($this->config['base_path'].'/'.$this->config['lang_path']);
         }, [], false);
     }
 

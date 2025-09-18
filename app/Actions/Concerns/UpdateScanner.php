@@ -94,7 +94,7 @@ class UpdateScanner
         abort_unless(
             code: 1,
             message: 'Config paths are not set.',
-            boolean: isset($this->config['base_path'], $this->config['lang_path']),
+            boolean: isset($this->config['base_path']),
         );
 
         return collect($this->config['paths'])
