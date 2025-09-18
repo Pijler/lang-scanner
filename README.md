@@ -36,7 +36,7 @@ Create a `scanner.json` file at the root of your Laravel project.
             "lang_path": "lang/",
             "paths": ["resources/"],
             "extensions": [".php"],
-            "methods": ["__", "trans", "trans_choice"]
+            "methods": ["__(*)", "trans(*)", "trans_choice(*)"]
         }
     ]
 }
@@ -51,7 +51,7 @@ Create a `scanner.json` file at the root of your Laravel project.
             "lang_path": "resources/lang/",
             "paths": ["resources/js/"],
             "extensions": [".js", ".vue"],
-            "methods": ["$t", "i18n.t"]
+            "methods": ["$t(*)", "i18n.t(*)"]
         }
     ]
 }
@@ -66,7 +66,7 @@ Create a `scanner.json` file at the root of your Laravel project.
             "lang_path": "resources/lang/",
             "paths": ["resources/js/"],
             "extensions": [".jsx", ".tsx"],
-            "methods": ["t", "i18n.t"]
+            "methods": ["t(*)", "i18n.t(*)"]
         }
     ]
 }
@@ -170,7 +170,7 @@ Use `extends` to reuse configs across modules:
 
 ### 💡 Best practices
 
--   Configure `methods` according to your framework (`__`/`trans` for Laravel, `t` for Vue/React).
+-   Configure `methods` according to your framework (`__(*)`/`trans(*)` for Laravel, `t(*)` for Vue/React).
 -   Always run with `check` in multi-language projects.
 -   Keep `sort` enabled for clean, ordered JSON files.
 -   Use `--no-update` in pipelines when you want validation only.

@@ -17,9 +17,9 @@ test('it should return one config when no extends are defined', function () {
             0 => '.php',
         ],
         'methods' => [
-            0 => '__',
-            1 => 'trans',
-            2 => 'trans_choice',
+            0 => '__(*)',
+            1 => 'trans(*)',
+            2 => 'trans_choice(*)',
         ],
         'base_path' => base_path('tests/Fixtures/test-a'),
     ]);
@@ -40,9 +40,9 @@ test('it should return multiple configs when extends are defined', function () {
             0 => '.php',
         ],
         'methods' => [
-            0 => '__',
-            1 => 'trans',
-            2 => 'trans_choice',
+            0 => '__(*)',
+            1 => 'trans(*)',
+            2 => 'trans_choice(*)',
         ],
         'base_path' => base_path('tests/Fixtures/test-f/module1'),
     ]);
@@ -55,9 +55,9 @@ test('it should return multiple configs when extends are defined', function () {
             0 => '.php',
         ],
         'methods' => [
-            0 => '__',
-            1 => 'trans',
-            2 => 'trans_choice',
+            0 => '__(*)',
+            1 => 'trans(*)',
+            2 => 'trans_choice(*)',
         ],
         'base_path' => base_path('tests/Fixtures/test-f/module2'),
     ]);

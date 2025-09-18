@@ -23,9 +23,9 @@ class ConfigurationJsonRepository
                     '.html',
                 ],
                 'methods' => [
-                    '__',
-                    'trans',
-                    'trans_choice',
+                    '__(*)',
+                    'trans(*)',
+                    'trans_choice(*)',
                 ],
             ],
         ],

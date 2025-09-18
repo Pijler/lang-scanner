@@ -14,7 +14,7 @@ use Tests\TestCase;
 
 $fixturesPath = __DIR__.'/Fixtures';
 
-$tempBackupPath = __DIR__.'/../../storage/app/temp-backup';
+$tempBackupPath = __DIR__.'/../storage/app/temp-backup';
 
 /*
 |--------------------------------------------------------------------------
