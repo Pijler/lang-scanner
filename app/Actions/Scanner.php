@@ -2,9 +2,9 @@
 
 namespace App\Actions;
 
-use App\Actions\Concerns\CheckScanner;
+use App\Actions\Base\CheckScanner;
+use App\Actions\Base\UpdateScanner;
 use App\Actions\Concerns\RecursiveConfigs;
-use App\Actions\Concerns\UpdateScanner;
 use App\Output\ProgressOutput;
 use App\Project;
 use Symfony\Component\Console\Input\InputInterface;

@@ -2,8 +2,8 @@
 
 namespace App\Providers;
 
-use App\Actions\Concerns\CheckScanner;
-use App\Actions\Concerns\UpdateScanner;
+use App\Actions\Base\CheckScanner;
+use App\Actions\Base\UpdateScanner;
 use App\Actions\ElaborateSummary;
 use App\Actions\Scanner;
 use App\Commands\DefaultCommand;

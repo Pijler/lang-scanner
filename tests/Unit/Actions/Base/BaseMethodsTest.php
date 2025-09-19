@@ -1,6 +1,6 @@
 <?php
 
-use App\Actions\Concerns\CheckScanner;
+use App\Actions\Base\CheckScanner;
 
 test('it should check default dotting as false', function () {
     console('default', []);

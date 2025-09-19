@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Actions\Concerns;
+namespace App\Actions\Base;
 
+use App\Actions\Concerns\BaseMethods;
 use App\Enum\Status;
 use App\Output\ProgressOutput;
 use Illuminate\Support\Arr;

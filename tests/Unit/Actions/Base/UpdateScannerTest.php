@@ -1,6 +1,6 @@
 <?php
 
-use App\Actions\Concerns\UpdateScanner;
+use App\Actions\Base\UpdateScanner;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
 use Symfony\Component\Finder\SplFileInfo;
