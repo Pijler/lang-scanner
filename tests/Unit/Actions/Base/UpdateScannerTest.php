@@ -5,54 +5,6 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
 use Symfony\Component\Finder\SplFileInfo;
 
-test('it should merge old and new translations', function () {
-    console('default', []);
-
-    $updateScanner = resolve(UpdateScanner::class);
-
-    $new = [
-        'email' => '',
-        'address' => [
-            'city' => '',
-        ],
-        'phones' => [
-            'home' => '',
-        ],
-    ];
-
-    $old = [
-        'name' => 'Name',
-        'address' => [
-            'street' => 'Address Street',
-            'zip' => 'Address Zip',
-        ],
-        'phones' => [
-            'work' => 'Work Phone',
-        ],
-    ];
-
-    [$merged, $diff] = $this->callMethod($updateScanner, 'mergeTranslations', [$old, $new]);
-
-    expect($diff)->toBe([
-        'email',
-        'address.city',
-        'phones.home',
-    ]);
-    expect($merged)->toBe([
-        'email' => '',
-        'address' => [
-            'city' => '',
-            'street' => 'Address Street',
-            'zip' => 'Address Zip',
-        ],
-        'phones' => [
-            'home' => '',
-            'work' => 'Work Phone',
-        ],
-        'name' => 'Name',
-    ]);
-});
-
 test('it should return files to scan', function () {
     console('default', []);
 
@@ -77,6 +29,8 @@ test('it should return files to scan', function () {
         expect($e->getCode())->toBe(0);
         expect($e->getMessage())->toBe('Config paths are not set.');
     });
+
+    $updateScanner->setPaths([getcwd()]);
 
     $this->setProperty($updateScanner, 'config', scannerConfig(
         base_path('tests/Fixtures/test-a/scanner.json'),

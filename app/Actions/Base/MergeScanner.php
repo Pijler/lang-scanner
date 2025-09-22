@@ -9,7 +9,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Finder\SplFileInfo;
 
-class CheckScanner
+class MergeScanner
 {
     use BaseMethods;
 
@@ -29,33 +29,27 @@ class CheckScanner
     {
         $this->config = $config;
 
-        $translations = $this->getTranslations();
-
-        $this->checkTranslations($translations);
+        $this->mergeTranslations();
 
         return [$this->totalFiles, $this->changes];
     }
 
     /**
-     * Determine if can't have empty translations.
+     * Update translations based on collected keys from files.
      */
-    protected function noEmpty(): bool
+    private function mergeTranslations(): void
     {
-        return $this->input->getOption('no-empty');
+        $translations = $this->getTranslations();
+
+        if (filled($translations)) {
+            $this->addNewTranslations($translations);
+        }
     }
 
     /**
-     * Determine if we should skip updating files.
+     * Add new translations to the translation file.
      */
-    protected function noUpdate(): bool
-    {
-        return $this->config['no-update'] ?? $this->input->getOption('no-update');
-    }
-
-    /**
-     * Check translations for any issues.
-     */
-    private function checkTranslations(array $new): void
+    private function addNewTranslations(array $new): void
     {
         $files = $this->getFiles();
 
@@ -70,12 +64,11 @@ class CheckScanner
 
                 [$merged, $diff] = $this->diffTranslations($old, $new);
 
-                $this->putContent($file, $old);
+                $this->putContent($file, $merged);
 
                 $this->progressOutput->handle(blank($diff) ? Status::SKIPPED : Status::ERROR);
 
                 $this->changes[] = [
-                    'check' => true,
                     'count' => count($diff),
                     'file' => $file->getRealPath(),
                     'issues' => array_values($diff),

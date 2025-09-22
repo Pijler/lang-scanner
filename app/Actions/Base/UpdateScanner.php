@@ -21,7 +21,6 @@ class UpdateScanner
      * Creates a new Scanner instance.
      */
     public function __construct(
-        protected array $paths,
         protected InputInterface $input,
         protected OutputInterface $output,
         protected ProgressOutput $progressOutput,
@@ -65,20 +64,6 @@ class UpdateScanner
         if (filled($newTranslations)) {
             $this->addNewTranslations($newTranslations);
         }
-    }
-
-    /**
-     * Merges old and new translations.
-     */
-    private function mergeTranslations(array $old, array $new): array
-    {
-        $merged = array_replace_recursive($new, $old);
-
-        $diff = collect($merged)->dot()->keys()->diff(
-            collect($old)->dot()->keys()
-        )->values()->toArray();
-
-        return [$merged, $diff];
     }
 
     /**
@@ -193,9 +178,9 @@ class UpdateScanner
             ->map(function (SplFileInfo $file) use ($new) {
                 $old = json_decode($file->getContents(), true);
 
-                [$newTranslations, $diff] = $this->mergeTranslations($old, $new);
+                [$merged, $diff] = $this->diffTranslations($old, $new);
 
-                $this->putContent($file, $newTranslations);
+                $this->putContent($file, $merged);
 
                 $this->changes[] = [
                     'count' => count($diff),
