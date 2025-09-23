@@ -43,4 +43,16 @@ abstract class TestCase extends BaseTestCase
 
         return $property->getValue($object);
     }
+
+    /**
+     * Set protected / private static property of a class.
+     */
+    public function setStaticProperty(string $class, string $property, mixed $value): void
+    {
+        $reflection = new ReflectionClass($class);
+
+        $property = $reflection->getProperty($property);
+
+        $property->setValue(null, $value);
+    }
 }

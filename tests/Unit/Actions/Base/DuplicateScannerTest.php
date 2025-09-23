@@ -3,7 +3,7 @@
 use App\Actions\Base\DuplicateScanner;
 
 beforeEach(function () {
-    DuplicateScanner::$cache = [];
+    $this->setStaticProperty(DuplicateScanner::class, 'cache', []);
 });
 
 test('it should check if remove is enabled via option', function () {
@@ -61,13 +61,15 @@ test('it should return duplicates and filtered result', function () {
 
     console('default', []);
 
-    DuplicateScanner::$cache[$cacheKey] = [
-        'a' => 1,
-        'b' => 2,
-        'nested' => [
-            'x' => 'y',
+    $this->setStaticProperty(DuplicateScanner::class, 'cache', [
+        $cacheKey => [
+            'a' => 1,
+            'b' => 2,
+            'nested' => [
+                'x' => 'y',
+            ],
         ],
-    ];
+    ]);
 
     $current = [
         'a' => 1,

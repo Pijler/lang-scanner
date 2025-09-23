@@ -16,7 +16,7 @@ class DuplicateScanner
     /**
      * The translation array.
      */
-    public static array $cache = [];
+    protected static array $cache = [];
 
     /**
      * Creates a new Scanner instance.

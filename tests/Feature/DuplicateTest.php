@@ -3,7 +3,7 @@
 use App\Actions\Base\DuplicateScanner;
 
 beforeEach(function () {
-    DuplicateScanner::$cache = [];
+    $this->setStaticProperty(DuplicateScanner::class, 'cache', []);
 });
 
 test('it should run default command (test-j)', function () {
