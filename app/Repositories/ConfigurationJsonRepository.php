@@ -39,6 +39,14 @@ class ConfigurationJsonRepository
     ) {}
 
     /**
+     * Get the cache configuration.
+     */
+    public function cache(): ?string
+    {
+        return data_get($this->get(), 'cache');
+    }
+
+    /**
      * Get the scanner configuration.
      */
     public function scanner(): array

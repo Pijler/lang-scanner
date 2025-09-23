@@ -8,6 +8,11 @@ use Illuminate\Support\Str;
 class RecursiveConfigs
 {
     /**
+     * The cache path.
+     */
+    protected static ?string $cache = null;
+
+    /**
      * The configuration repository instance.
      */
     protected ConfigurationJsonRepository $repository;
@@ -26,6 +31,8 @@ class RecursiveConfigs
      */
     public function execute(): array
     {
+        $this->getCache();
+
         $scanner = $this->getScanner();
         $extends = $this->getExtends();
 
@@ -41,6 +48,16 @@ class RecursiveConfigs
     }
 
     /**
+     * Get the cache path (if defined).
+     */
+    private function getCache(): void
+    {
+        if ($cache = $this->repository->cache()) {
+            static::$cache = $this->getBasePath().'/'.trim($cache, '/');
+        }
+    }
+
+    /**
      * Get the scanner configuration.
      */
     private function getScanner(): array
@@ -49,6 +66,7 @@ class RecursiveConfigs
 
         return collect($scanner)->map(function (array $config) {
             return array_merge($config, [
+                'cache' => static::$cache,
                 'base_path' => $this->getBasePath(),
             ]);
         })->toArray();

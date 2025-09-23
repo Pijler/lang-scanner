@@ -79,6 +79,7 @@ test('it should return the extends config', function () {
     expect($extends)->toBe([
         '/module1/scanner.json',
         '/module2/scanner.json',
+        '/module3/scanner.json',
     ]);
 });
 
