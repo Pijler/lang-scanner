@@ -2,6 +2,7 @@
 
 namespace App\Actions\Concerns;
 
+use App\Repositories\CacheRepository;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
 use Symfony\Component\Console\Input\InputInterface;
@@ -94,6 +95,16 @@ trait BaseMethods
     }
 
     /**
+     * Checks if the file content is equal to the given content.
+     */
+    private function isEqual(SplFileInfo $file, array $content): bool
+    {
+        $contents = json_decode($file->getContents(), true);
+
+        return json_encode($contents) === json_encode($content);
+    }
+
+    /**
      * Merges old and new translations, returning the merged array and the diff.
      */
     protected function diffTranslations(array $old, array $new): array
@@ -125,7 +136,13 @@ trait BaseMethods
 
             $content = $this->sortArray($content);
 
-            File::put($file->getRealPath(), json_encode($content, $this->flags));
+            if (! $this->isEqual($file, $content)) {
+                CacheRepository::lastRun();
+
+                $contents = json_encode($content, $this->flags);
+
+                File::put($file->getRealPath(), $contents, LOCK_EX);
+            }
         }
     }
 

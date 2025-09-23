@@ -3,9 +3,9 @@
 namespace App\Actions\Base;
 
 use App\Actions\Concerns\BaseMethods;
-use App\Actions\Concerns\CacheMethods;
 use App\Enum\Status;
 use App\Output\ProgressOutput;
+use App\Repositories\CacheRepository;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
@@ -17,7 +17,6 @@ use Symfony\Component\Finder\SplFileInfo;
 class UpdateScanner
 {
     use BaseMethods;
-    use CacheMethods;
 
     /**
      * Creates a new Scanner instance.
@@ -34,8 +33,6 @@ class UpdateScanner
     public function execute(array $config): array
     {
         $this->config = $config;
-
-        $this->initializeCache();
 
         $files = $this->getFilesToScan();
 
@@ -108,7 +105,7 @@ class UpdateScanner
      */
     private function extractTranslationKeysFromFile(SplFileInfo $file): array
     {
-        return $this->cacheFile($file, function (SplFileInfo $file) {
+        return CacheRepository::cacheFile($file, function (SplFileInfo $file) {
             $content = $file->getContents();
 
             abort_unless(

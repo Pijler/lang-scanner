@@ -9,6 +9,7 @@ use App\Actions\Base\UpdateScanner;
 use App\Actions\Concerns\RecursiveConfigs;
 use App\Output\ProgressOutput;
 use App\Project;
+use App\Repositories\CacheRepository;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -72,6 +73,8 @@ class Scanner
         $configs = $this->getConfigs();
 
         collect($configs)->each(function (array $config) {
+            CacheRepository::initializeCache($config);
+
             $mode = match (true) {
                 $this->merged($config) => 'merge',
                 $this->checked($config) => 'check',
