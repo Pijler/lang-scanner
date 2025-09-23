@@ -29,8 +29,8 @@ class CacheRepository
         }
 
         static::$cache = $cache
-            ? dirname($cache).'/scanner.json'
-            : Project::path().'/storage/framework/cache/scanner.json';
+            ? dirname($cache).'/cache.scanner'
+            : Project::path().'/bootstrap/cache/cache.scanner';
 
         File::ensureDirectoryExists(dirname(static::$cache));
     }
