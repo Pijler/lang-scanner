@@ -16,7 +16,7 @@ class DuplicateScanner
     /**
      * The translation array.
      */
-    protected static array $cache = [];
+    public static array $cache = [];
 
     /**
      * Creates a new Scanner instance.
@@ -50,6 +50,34 @@ class DuplicateScanner
     }
 
     /**
+     * Update the cache with new translations.
+     */
+    private function updateCache(string $cacheKey, array $new): void
+    {
+        $old = data_get(static::$cache, $cacheKey, []);
+
+        $merged = array_replace_recursive($new, $old);
+
+        data_set(static::$cache, $cacheKey, $merged);
+    }
+
+    /**
+     * Remove empty arrays from the given array.
+     */
+    protected function filterArray(array $array): array
+    {
+        return collect($array)->transform(function ($value) {
+            if (is_array($value)) {
+                return $this->filterArray($value);
+            }
+
+            return $value;
+        })->reject(function ($value) {
+            return is_array($value) && blank($value);
+        })->all();
+    }
+
+    /**
      * Find duplicate entries based on cached translations.
      */
     private function getDuplicates(array $current, string $cacheKey): array
@@ -62,7 +90,24 @@ class DuplicateScanner
 
         $result = collect($current)->except($duplicates)->all();
 
-        return [$result, $duplicates];
+        return [$this->filterArray($result), $duplicates];
+    }
+
+    /**
+     * Generate a unique cache key for the given file and methods.
+     */
+    private function getCacheKey(SplFileInfo $file): string
+    {
+        abort_unless(
+            code: 1,
+            boolean: isset($this->config['methods']),
+            message: 'Missing "methods" configuration for duplicate scanner.',
+        );
+
+        return md5(json_encode([
+            'filename' => $file->getFilename(),
+            'methods' => data_get($this->config, 'methods', []),
+        ]));
     }
 
     /**
@@ -72,20 +117,14 @@ class DuplicateScanner
     {
         $files = $this->getFiles();
 
-        abort_unless(
-            code: 1,
-            boolean: isset($this->config['methods']),
-            message: 'Missing "methods" configuration for duplicate scanner.',
-        );
-
-        $cacheKey = md5(json_encode(data_get($this->config, 'methods', [])));
-
         collect($files)
             ->filter(function (SplFileInfo $file) {
                 return $file->getExtension() === 'json';
             })
-            ->map(function (SplFileInfo $file) use ($new, $cacheKey) {
+            ->map(function (SplFileInfo $file) use ($new) {
                 $this->totalFiles++;
+
+                $cacheKey = $this->getCacheKey($file);
 
                 $old = json_decode($file->getContents(), true);
 
@@ -109,7 +148,7 @@ class DuplicateScanner
                     'issues' => array_values($diff) + array_values($duplicates),
                 ];
 
-                data_set(static::$cache, $cacheKey, $merged);
+                $this->updateCache($cacheKey, $merged);
             });
     }
 }
