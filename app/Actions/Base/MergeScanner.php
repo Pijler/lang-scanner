@@ -1,14 +1,15 @@
 <?php
 
-namespace App\Actions\Concerns;
+namespace App\Actions\Base;
 
+use App\Actions\Concerns\BaseMethods;
 use App\Enum\Status;
 use App\Output\ProgressOutput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Finder\SplFileInfo;
 
-class CheckScanner
+class MergeScanner
 {
     use BaseMethods;
 
@@ -16,7 +17,6 @@ class CheckScanner
      * Creates a new Scanner instance.
      */
     public function __construct(
-        protected array $paths,
         protected InputInterface $input,
         protected OutputInterface $output,
         protected ProgressOutput $progressOutput,
@@ -29,33 +29,25 @@ class CheckScanner
     {
         $this->config = $config;
 
-        $translations = $this->getTranslations();
-
-        $this->checkTranslations($translations);
+        $this->mergeTranslations();
 
         return [$this->totalFiles, $this->changes];
     }
 
-    protected function noUpdate(): bool
+    /**
+     * Update translations based on collected keys from files.
+     */
+    private function mergeTranslations(): void
     {
-        return $this->config['no-update'] ?? $this->input->getOption('no-update');
+        $translations = $this->getTranslations();
+
+        $this->addNewTranslations($translations);
     }
 
     /**
-     * Get the current translations from a file.
+     * Add new translations to the translation file.
      */
-    private function currentTranslations(array $content): array
-    {
-        return collect($content)->dot()->when(
-            $this->input->getOption('no-empty'),
-            fn ($collection) => $collection->filter(fn ($value) => filled($value))
-        )->keys()->toArray();
-    }
-
-    /**
-     * Check translations for any issues.
-     */
-    private function checkTranslations(array $translations): void
+    private function addNewTranslations(array $new): void
     {
         $files = $this->getFiles();
 
@@ -63,24 +55,18 @@ class CheckScanner
             ->filter(function (SplFileInfo $file) {
                 return $file->getExtension() === 'json';
             })
-            ->map(function (SplFileInfo $file) use ($translations) {
+            ->map(function (SplFileInfo $file) use ($new) {
                 $this->totalFiles++;
 
-                $content = json_decode($file->getContents(), true);
+                $old = json_decode($file->getContents(), true);
 
-                $diff = array_diff(
-                    collect($translations)->dot()->keys()->toArray(),
-                    $this->currentTranslations($content),
-                );
+                [$merged, $diff] = $this->diffTranslations($old, $new);
 
-                if (! $this->noUpdate()) {
-                    $this->putContent($file, $content);
-                }
+                $this->putContent($file, $merged);
 
                 $this->progressOutput->handle(blank($diff) ? Status::SKIPPED : Status::ERROR);
 
                 $this->changes[] = [
-                    'check' => true,
                     'count' => count($diff),
                     'file' => $file->getRealPath(),
                     'issues' => array_values($diff),

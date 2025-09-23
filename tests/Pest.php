@@ -3,6 +3,7 @@
 use App\Actions\Concerns\RecursiveConfigs;
 use App\Commands\DefaultCommand;
 use App\Contracts\PathsRepository;
+use App\Project;
 use Illuminate\Foundation\Console\Kernel;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
@@ -92,7 +93,7 @@ function mockDiff(array $paths): void
 {
     $mock = mock(PathsRepository::class);
 
-    $mock->shouldReceive('diff')->twice()->andReturn($paths);
+    $mock->shouldReceive('diff')->once()->andReturn($paths);
 
     app()->instance(PathsRepository::class, $mock);
 }
@@ -104,7 +105,7 @@ function mockDirty(array $paths): void
 {
     $mock = mock(PathsRepository::class);
 
-    $mock->shouldReceive('dirty')->twice()->andReturn($paths);
+    $mock->shouldReceive('dirty')->once()->andReturn($paths);
 
     app()->instance(PathsRepository::class, $mock);
 }

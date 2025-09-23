@@ -13,6 +13,11 @@ use Symfony\Component\Finder\SplFileInfo;
 trait BaseMethods
 {
     /**
+     * The paths to scan.
+     */
+    protected array $paths = [];
+
+    /**
      * The configuration options for the scanner.
      */
     protected array $config = [];
@@ -33,6 +38,14 @@ trait BaseMethods
     protected int $flags = JSON_PRETTY_PRINT
         | JSON_UNESCAPED_UNICODE
         | JSON_UNESCAPED_SLASHES;
+
+    /**
+     * Sets the paths to scan.
+     */
+    public function setPaths(array $paths): void
+    {
+        $this->paths = $paths;
+    }
 
     /**
      * Checks if the translations should be dotted.
@@ -81,10 +94,32 @@ trait BaseMethods
     }
 
     /**
+     * Merges old and new translations, returning the merged array and the diff.
+     */
+    protected function diffTranslations(array $old, array $new): array
+    {
+        $merged = array_replace_recursive($new, $old);
+
+        $noEmpty = method_exists($this, 'noEmpty') && $this->noEmpty();
+
+        $diff = collect($merged)->dot()->keys()->diff(
+            collect($old)->dot()->when($noEmpty, function ($c) {
+                return $c->filter(fn ($value) => filled($value));
+            })->keys()
+        )->values()->toArray();
+
+        return [$merged, $diff];
+    }
+
+    /**
      * Puts the content into the specified file.
      */
     protected function putContent(SplFileInfo $file, array $content): void
     {
+        if (method_exists($this, 'noUpdate') && $this->noUpdate()) {
+            return;
+        }
+
         if (filled($content)) {
             $content = $this->dotArray($content);
 

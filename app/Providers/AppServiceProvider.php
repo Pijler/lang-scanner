@@ -2,8 +2,9 @@
 
 namespace App\Providers;
 
-use App\Actions\Concerns\CheckScanner;
-use App\Actions\Concerns\UpdateScanner;
+use App\Actions\Base\CheckScanner;
+use App\Actions\Base\MergeScanner;
+use App\Actions\Base\UpdateScanner;
 use App\Actions\ElaborateSummary;
 use App\Actions\Scanner;
 use App\Commands\DefaultCommand;
@@ -59,9 +60,10 @@ class AppServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(Scanner::class, function () {
+            $input = resolve(InputInterface::class);
+
             return new Scanner(
-                resolve(CheckScanner::class),
-                resolve(UpdateScanner::class),
+                Project::paths($input),
                 resolve(InputInterface::class),
                 resolve(OutputInterface::class),
                 resolve(ProgressOutput::class),
@@ -77,10 +79,15 @@ class AppServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(CheckScanner::class, function () {
-            $input = resolve(InputInterface::class);
-
             return new CheckScanner(
-                Project::paths($input),
+                resolve(InputInterface::class),
+                resolve(OutputInterface::class),
+                resolve(ProgressOutput::class),
+            );
+        });
+
+        $this->app->singleton(MergeScanner::class, function () {
+            return new MergeScanner(
                 resolve(InputInterface::class),
                 resolve(OutputInterface::class),
                 resolve(ProgressOutput::class),
@@ -88,10 +95,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(UpdateScanner::class, function () {
-            $input = resolve(InputInterface::class);
-
             return new UpdateScanner(
-                Project::paths($input),
                 resolve(InputInterface::class),
                 resolve(OutputInterface::class),
                 resolve(ProgressOutput::class),
