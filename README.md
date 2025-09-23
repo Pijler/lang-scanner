@@ -12,10 +12,13 @@ Although it’s a Laravel package, it’s flexible enough to scan translations f
 -   ⚙️ Flexible configuration for methods (`__`, `trans`, `trans_choice`, `t`, `i18n.t`, …).
 -   📂 Supports multiple paths and modules.
 -   🧩 Extensible via `extends` for modular configs.
--   ✅ `check` ensures all language files have the same keys.
+-   ✅ `check` or `--check` checks if all language files have the same keys.
 -   📑 `sort` automatically orders JSON keys globally (**enabled by default**).
 -   🔗 `--dot` saves translations in dot notation.
 -   🚫 `--no-update` skips updating JSON files when running `check` (verification only).
+-   🔀 `merge` or `--merge` combines duplicate or related translations into a single entry.
+-   📝 `--duplicate` lists all duplicate translations for review.
+-   ❌ `--remove` removes duplicate translations, keeping only the main version, when running `duplicate`.
 
 ### 📦 Installation
 
@@ -96,6 +99,19 @@ Create a `scanner.json` file at the root of your Laravel project.
 }
 ```
 
+#### Example with `merge`:
+
+```json
+{
+    "scanner": [
+        {
+            "merge": true,
+            "lang_path": "lang/"
+        }
+    ]
+}
+```
+
 ### 📋 Usage
 
 Run the scan:
@@ -114,7 +130,7 @@ The command will:
 
 #### `--check`
 
-Ensures that all language JSON files inside lang_path have the same keys.
+Checks if that all language JSON files inside lang_path have the same keys.
 
 Reports inconsistencies when a key exists in one locale but is missing in another.
 
@@ -145,6 +161,16 @@ Saves JSON translations in **dot notation**:
     ./vendor/bin/scanner --dot
 ```
 
+#### `--empty`
+
+When using check, you may want to ignore empty translations as finished translations.
+
+A good option to use in CI/CD pipelines.
+
+```bash
+    ./vendor/bin/scanner --check --empty
+```
+
 #### `--no-update`
 
 When using check, prevents updating JSON files even if sort or dot are enabled.
@@ -153,6 +179,30 @@ Useful for CI/CD validation pipelines.
 
 ```bash
     ./vendor/bin/scanner --check --no-update
+```
+
+#### `--merge`
+
+Ensures that all language JSON files inside lang_path have the same keys.
+
+```bash
+    ./vendor/bin/scanner --merge
+```
+
+#### `--duplicate`
+
+Checks for and lists all duplicate records, allowing you to identify inconsistencies without modifying anything yet.
+
+```bash
+    ./vendor/bin/scanner --duplicate
+```
+
+#### `--remove`
+
+After identifying duplicate records, automatically removes the repeated entries, keeping only the main version.
+
+```bash
+    ./vendor/bin/scanner --duplicate --remove
 ```
 
 ### 🧩 Extensibility with extends
@@ -174,6 +224,7 @@ Use `extends` to reuse configs across modules:
 -   Always run with `check` in multi-language projects.
 -   Keep `sort` enabled for clean, ordered JSON files.
 -   Use `--no-update` in pipelines when you want validation only.
+-   Avoid duplicate keys, as you may forget and translate them differently.
 -   Centralize shared configs with `extends`.
 
 Any improvement or correction can open a PR or Issue.
