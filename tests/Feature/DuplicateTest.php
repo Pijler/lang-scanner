@@ -6,8 +6,8 @@ test('it should run default command (test-j)', function () {
         '--config' => base_path('tests/Fixtures/test-j/scanner.json'),
     ]);
 
-    // expect($status)->toBe(0);
-    // expect($output)->toContain('NO ISSUES', '2 files');
+    expect($status)->toBe(1);
+    expect($output)->toContain('SCANNED', '6 files, New 62 translations scanned');
 
     // expect(getContent(base_path('tests/Fixtures/test-j/lang/en-US.json')))->toBe([
     //     //
@@ -25,8 +25,8 @@ test('it should run default command (test-j) removing duplicates', function () {
         '--config' => base_path('tests/Fixtures/test-j/scanner.json'),
     ]);
 
-    // expect($status)->toBe(0);
-    // expect($output)->toContain('NO ISSUES', '2 files');
+    expect($status)->toBe(1);
+    expect($output)->toContain('SCANNED', '6 files, New 71 translations scanned');
 
     // expect(getContent(base_path('tests/Fixtures/test-j/lang/en-US.json')))->toBe([
     //     //

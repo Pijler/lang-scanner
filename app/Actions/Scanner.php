@@ -3,6 +3,7 @@
 namespace App\Actions;
 
 use App\Actions\Base\CheckScanner;
+use App\Actions\Base\DuplicateScanner;
 use App\Actions\Base\MergeScanner;
 use App\Actions\Base\UpdateScanner;
 use App\Actions\Concerns\RecursiveConfigs;
@@ -29,12 +30,18 @@ class Scanner
     protected UpdateScanner $update;
 
     /**
+     * The Duplicate Scanner instance.
+     */
+    protected DuplicateScanner $duplicate;
+
+    /**
      * The stats of scanned files and changes.
      */
     protected array $stats = [
         'check' => ['files' => 0, 'changes' => []],
         'merge' => ['files' => 0, 'changes' => []],
         'update' => ['files' => 0, 'changes' => []],
+        'duplicate' => ['files' => 0, 'changes' => []],
     ];
 
     /**
@@ -49,10 +56,12 @@ class Scanner
         $this->check = resolve(CheckScanner::class);
         $this->merge = resolve(MergeScanner::class);
         $this->update = resolve(UpdateScanner::class);
+        $this->duplicate = resolve(DuplicateScanner::class);
 
         $this->check->setPaths($this->paths);
         $this->merge->setPaths($this->paths);
         $this->update->setPaths($this->paths);
+        $this->duplicate->setPaths($this->paths);
     }
 
     /**
@@ -66,6 +75,7 @@ class Scanner
             $mode = match (true) {
                 $this->merged($config) => 'merge',
                 $this->checked($config) => 'check',
+                $this->duplicated($config) => 'duplicate',
                 default => 'update',
             };
 
@@ -95,6 +105,14 @@ class Scanner
     }
 
     /**
+     * Checks if the scanner is in duplicated mode.
+     */
+    private function duplicated(array $config): bool
+    {
+        return $config['duplicate'] ?? $this->input->getOption('duplicate');
+    }
+
+    /**
      * Get the configuration files to scan.
      */
     private function getConfigs(): array
@@ -113,6 +131,7 @@ class Scanner
             'check' => $this->check->execute($config),
             'merge' => $this->merge->execute($config),
             'update' => $this->update->execute($config),
+            'duplicate' => $this->duplicate->execute($config),
         };
 
         data_set($this->stats, "{$mode}.files", $files);
