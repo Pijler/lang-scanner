@@ -1,0 +1,30 @@
+{
+    "App Description": "Descrição App",
+    "App Name": "Nome App",
+    "App Version": "Versão App",
+    "App. Description!": "App. Descrição!",
+    "App. Description.": "App. Descrição.",
+    "App. Name!": "App. Nome!",
+    "App. Name.": "App. Nome.",
+    "App. Version!": "App. Versão!",
+    "App. Version.": "App. Versão.",
+    "Base Description": "Descrição Base",
+    "Base Name": "Nome Base",
+    "Base Version": "Versão Base",
+    "Base. Description!": "Base. Descrição!",
+    "Base. Description.": "Base. Descrição.",
+    "Base. Name!": "Base. Nome!",
+    "Base. Name.": "Base. Nome.",
+    "Base. Version!": "Base. Versão!",
+    "Base. Version.": "Base. Versão.",
+    "app": {
+        "description": "app.descrição",
+        "name": "app.nome",
+        "version": "app.versão"
+    },
+    "base": {
+        "description": "base.descrição",
+        "name": "base.nome",
+        "version": "base.versão"
+    }
+}

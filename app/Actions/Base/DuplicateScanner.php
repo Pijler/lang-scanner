@@ -72,7 +72,13 @@ class DuplicateScanner
     {
         $files = $this->getFiles();
 
-        $cacheKey = md5(json_encode(data_get($this->config, 'paths', [])));
+        abort_unless(
+            code: 1,
+            boolean: isset($this->config['methods']),
+            message: 'Missing "methods" configuration for duplicate scanner.',
+        );
+
+        $cacheKey = md5(json_encode(data_get($this->config, 'methods', [])));
 
         collect($files)
             ->filter(function (SplFileInfo $file) {

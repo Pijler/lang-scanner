@@ -1,0 +1,12 @@
+{
+    "scanner": [
+        {
+            "lang_path": "lang/",
+            "methods": [
+                "__(*)",
+                "trans(*)",
+                "trans_choice(*)"
+            ]
+        }
+    ]
+}
