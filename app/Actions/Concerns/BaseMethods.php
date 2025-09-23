@@ -136,7 +136,7 @@ trait BaseMethods
 
             $content = $this->sortArray($content);
 
-            if (!$this->isEqual($file, $content)) {
+            if (! $this->isEqual($file, $content)) {
                 CacheRepository::lastRun();
 
                 $contents = json_encode($content, $this->flags);
