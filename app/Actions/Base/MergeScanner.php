@@ -41,9 +41,7 @@ class MergeScanner
     {
         $translations = $this->getTranslations();
 
-        if (filled($translations)) {
-            $this->addNewTranslations($translations);
-        }
+        $this->addNewTranslations($translations);
     }
 
     /**
