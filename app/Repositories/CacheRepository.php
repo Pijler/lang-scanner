@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Actions\Concerns;
+namespace App\Repositories;
 
 use App\Project;
 use Closure;
@@ -8,47 +8,58 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\File;
 use Symfony\Component\Finder\SplFileInfo;
 
-/**
- * @property array $config
- */
-trait CacheMethods
+class CacheRepository
 {
     /**
      * Path to store the cache file.
      */
-    protected ?string $cachePath = null;
+    protected static ?string $cache = null;
 
     /**
      * Initialize the cache settings based on configuration.
      */
-    protected function initializeCache(): void
+    public static function initializeCache(array $config): void
     {
-        $cache = data_get($this->config, 'cache');
+        $cache = data_get($config, 'cache');
 
         if ($cache === false) {
-            $this->cachePath = null;
+            static::$cache = null;
 
             return;
         }
 
-        $this->cachePath = $cache
+        static::$cache = $cache
             ? dirname($cache).'/scanner.json'
             : Project::path().'/storage/framework/cache/scanner.json';
 
-        File::ensureDirectoryExists(dirname($this->cachePath));
+        File::ensureDirectoryExists(dirname(static::$cache));
+    }
+
+    /**
+     * Update the last run timestamp in the cache.
+     */
+    public static function lastRun(): void
+    {
+        $cache = rescue(function () {
+            return json_decode(File::get(static::$cache), true);
+        }, []);
+
+        data_set($cache, 'last_run', Carbon::now()->toDateTimeString());
+
+        File::put(static::$cache, json_encode($cache, JSON_UNESCAPED_UNICODE), LOCK_EX);
     }
 
     /**
      * Check if the file has changed since last scan.
      */
-    protected function cacheFile(SplFileInfo $file, Closure $callback): array
+    public static function cacheFile(SplFileInfo $file, Closure $callback): array
     {
-        if ($this->cachePath === null) {
+        if (static::$cache === null) {
             return $callback($file);
         }
 
         $cache = rescue(function () {
-            return json_decode(File::get($this->cachePath), true);
+            return json_decode(File::get(static::$cache), true);
         }, []);
 
         $cacheKey = md5($file->getRealPath());
@@ -64,9 +75,7 @@ trait CacheMethods
         return tap($callback($file), function () use ($cache, $cacheKey, $cacheValue) {
             data_set($cache, "files.{$cacheKey}", $cacheValue);
 
-            data_set($cache, 'last_run', Carbon::now()->toDateTimeString());
-
-            File::put($this->cachePath, json_encode($cache, JSON_UNESCAPED_UNICODE), LOCK_EX);
+            File::put(static::$cache, json_encode($cache, JSON_UNESCAPED_UNICODE), LOCK_EX);
         });
     }
 }
