@@ -2,6 +2,7 @@
 
 namespace App\Actions\Concerns;
 
+use App\Project;
 use Closure;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\File;
@@ -31,8 +32,8 @@ trait CacheMethods
         }
 
         $this->cachePath = $cache
-            ? dirname($cache).'/cache.scanner'
-            : storage_path('framework/cache/cache.scanner');
+            ? dirname($cache).'/scanner.json'
+            : Project::path().'/storage/framework/cache/scanner.json';
 
         File::ensureDirectoryExists(dirname($this->cachePath));
     }
@@ -50,16 +51,18 @@ trait CacheMethods
             return json_decode(File::get($this->cachePath), true);
         }, []);
 
-        $cacheKey = md5($file->getRealPath().'|'.$file->getMTime());
+        $cacheKey = md5($file->getRealPath());
 
-        $currentKey = data_get($cache, "files.{$file->getRealPath()}");
+        $currentValue = data_get($cache, "files.{$cacheKey}");
 
-        if ($cacheKey === $currentKey) {
+        $cacheValue = md5($file->getRealPath().'|'.$file->getMTime());
+
+        if ($cacheValue === $currentValue) {
             return [];
         }
 
-        return tap($callback($file), function () use ($file, $cache, $cacheKey) {
-            data_set($cache, "files.{$file->getRealPath()}", $cacheKey);
+        return tap($callback($file), function () use ($cache, $cacheKey, $cacheValue) {
+            data_set($cache, "files.{$cacheKey}", $cacheValue);
 
             data_set($cache, 'last_run', Carbon::now()->toDateTimeString());
 

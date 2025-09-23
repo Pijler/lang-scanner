@@ -16,7 +16,7 @@ $fixturesPath = __DIR__.'/Fixtures';
 
 $tempBackupPath = __DIR__.'/../storage/app/temp-backup';
 
-$cachePath = __DIR__.'/../storage/framework/cache/cache.scanner';
+$cachePath = __DIR__.'/../storage/framework/cache/scanner.json';
 
 /*
 |--------------------------------------------------------------------------
