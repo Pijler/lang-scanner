@@ -2,6 +2,10 @@
 
 use App\Actions\Concerns\RecursiveConfigs;
 
+beforeEach(function () {
+    $this->setStaticProperty(RecursiveConfigs::class, 'cache', null);
+});
+
 test('it should return one config when no extends are defined', function () {
     $configs = (new RecursiveConfigs(
         base_path('tests/Fixtures/test-a/scanner.json'),

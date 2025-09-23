@@ -29,19 +29,11 @@ class MergeScanner
     {
         $this->config = $config;
 
-        $this->mergeTranslations();
-
-        return [$this->totalFiles, $this->changes];
-    }
-
-    /**
-     * Update translations based on collected keys from files.
-     */
-    private function mergeTranslations(): void
-    {
         $translations = $this->getTranslations();
 
         $this->addNewTranslations($translations);
+
+        return [$this->totalFiles, $this->changes];
     }
 
     /**

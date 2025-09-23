@@ -40,7 +40,7 @@ uses()->beforeEach(function () use ($cachePath, $fixturesPath, $tempBackupPath) 
 })->in('Unit', 'Feature');
 
 uses()->afterEach(function () use ($cachePath, $fixturesPath, $tempBackupPath) {
-    File::deleteDirectory($cachePath);
+    File::delete($cachePath);
 
     File::ensureDirectoryExists($tempBackupPath);
 
