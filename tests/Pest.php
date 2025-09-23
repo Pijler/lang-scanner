@@ -3,7 +3,6 @@
 use App\Actions\Concerns\RecursiveConfigs;
 use App\Commands\DefaultCommand;
 use App\Contracts\PathsRepository;
-use App\Project;
 use Illuminate\Foundation\Console\Kernel;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
@@ -16,6 +15,8 @@ use Tests\TestCase;
 $fixturesPath = __DIR__.'/Fixtures';
 
 $tempBackupPath = __DIR__.'/../storage/app/temp-backup';
+
+$cachePath = __DIR__.'/../storage/framework/cache/cache.scanner';
 
 /*
 |--------------------------------------------------------------------------
@@ -30,13 +31,17 @@ $tempBackupPath = __DIR__.'/../storage/app/temp-backup';
 
 uses(TestCase::class)->in('Unit', 'Feature');
 
-uses()->beforeEach(function () use ($fixturesPath, $tempBackupPath) {
+uses()->beforeEach(function () use ($cachePath, $fixturesPath, $tempBackupPath) {
+    File::delete($cachePath);
+
     File::ensureDirectoryExists($tempBackupPath);
 
     File::copyDirectory($fixturesPath, $tempBackupPath);
 })->in('Unit', 'Feature');
 
-uses()->afterEach(function () use ($fixturesPath, $tempBackupPath) {
+uses()->afterEach(function () use ($cachePath, $fixturesPath, $tempBackupPath) {
+    File::deleteDirectory($cachePath);
+
     File::ensureDirectoryExists($tempBackupPath);
 
     File::copyDirectory($tempBackupPath, $fixturesPath);

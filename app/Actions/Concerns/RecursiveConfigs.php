@@ -3,7 +3,6 @@
 namespace App\Actions\Concerns;
 
 use App\Repositories\ConfigurationJsonRepository;
-use Illuminate\Support\Str;
 
 class RecursiveConfigs
 {
@@ -40,20 +39,12 @@ class RecursiveConfigs
     }
 
     /**
-     * Get the base path for the configuration files.
-     */
-    private function getBasePath(): string
-    {
-        return Str::remove('/scanner.json', $this->path);
-    }
-
-    /**
      * Get the cache path (if defined).
      */
     private function getCache(): void
     {
         if ($cache = $this->repository->cache()) {
-            static::$cache = $this->getBasePath().'/'.trim($cache, '/');
+            static::$cache = dirname($this->path).'/'.trim($cache, '/');
         }
     }
 
@@ -67,7 +58,7 @@ class RecursiveConfigs
         return collect($scanner)->map(function (array $config) {
             return array_merge($config, [
                 'cache' => static::$cache,
-                'base_path' => $this->getBasePath(),
+                'base_path' => dirname($this->path),
             ]);
         })->toArray();
     }
@@ -80,7 +71,7 @@ class RecursiveConfigs
         $extends = $this->repository->extends();
 
         return collect($extends)->map(function (string $extension) {
-            $path = $this->getBasePath().'/'.trim($extension, '/');
+            $path = dirname($this->path).'/'.trim($extension, '/');
 
             return (new RecursiveConfigs($path))->execute();
         })->toArray();
