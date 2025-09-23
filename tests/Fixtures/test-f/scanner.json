@@ -1,6 +1,8 @@
 {
+    "cache": "/storage/app/scanner-cache.json",
     "extends": [
         "/module1/scanner.json",
-        "/module2/scanner.json"
+        "/module2/scanner.json",
+        "/module3/scanner.json"
     ]
 }
