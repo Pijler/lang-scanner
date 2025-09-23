@@ -49,7 +49,7 @@ test('it should return multiple configs when extends are defined', function () {
             1 => 'trans(*)',
             2 => 'trans_choice(*)',
         ],
-        'cache' => base_path('tests/Fixtures/test-f/storage/app/cache.scanner'),
+        'cache' => base_path('tests/Fixtures/test-f/storage/app/scanner.cache'),
         'base_path' => base_path('tests/Fixtures/test-f/module1'),
     ]);
     expect($configs[1])->toBe([
@@ -65,7 +65,7 @@ test('it should return multiple configs when extends are defined', function () {
             1 => 'trans(*)',
             2 => 'trans_choice(*)',
         ],
-        'cache' => base_path('tests/Fixtures/test-f/storage/app/cache.scanner'),
+        'cache' => base_path('tests/Fixtures/test-f/storage/app/scanner.cache'),
         'base_path' => base_path('tests/Fixtures/test-f/module2'),
     ]);
     expect($configs[2])->toBe([
@@ -81,7 +81,7 @@ test('it should return multiple configs when extends are defined', function () {
             1 => 'trans(*)',
             2 => 'trans_choice(*)',
         ],
-        'cache' => base_path('tests/Fixtures/test-f/storage/app/cache.scanner'),
+        'cache' => base_path('tests/Fixtures/test-f/storage/app/scanner.cache'),
         'base_path' => base_path('tests/Fixtures/test-f/module3/module4'),
     ]);
     expect($configs[3])->toBe([
@@ -97,7 +97,7 @@ test('it should return multiple configs when extends are defined', function () {
             1 => 'trans(*)',
             2 => 'trans_choice(*)',
         ],
-        'cache' => base_path('tests/Fixtures/test-f/storage/app/cache.scanner'),
+        'cache' => base_path('tests/Fixtures/test-f/storage/app/scanner.cache'),
         'base_path' => base_path('tests/Fixtures/test-f/module3/module5'),
     ]);
 });
