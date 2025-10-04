@@ -20,7 +20,11 @@ class Project
             return static::resolveDiffPaths($diff);
         }
 
-        return [static::path()];
+        $path = $input->getArgument('path');
+
+        return blank($path) ? [static::path()] : collect($path)->map(function ($path) {
+            return realpath($path) ?: abort(1, "The path [{$path}] does not exist.");
+        })->all();
     }
 
     /**

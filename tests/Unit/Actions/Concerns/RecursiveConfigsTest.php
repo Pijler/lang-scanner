@@ -2,10 +2,6 @@
 
 use App\Actions\Concerns\RecursiveConfigs;
 
-beforeEach(function () {
-    $this->setStaticProperty(RecursiveConfigs::class, 'cache', null);
-});
-
 test('it should return one config when no extends are defined', function () {
     $configs = (new RecursiveConfigs(
         base_path('tests/Fixtures/test-a/scanner.json'),
@@ -25,7 +21,6 @@ test('it should return one config when no extends are defined', function () {
             1 => 'trans(*)',
             2 => 'trans_choice(*)',
         ],
-        'cache' => null,
         'base_path' => base_path('tests/Fixtures/test-a'),
     ]);
 });
@@ -49,7 +44,6 @@ test('it should return multiple configs when extends are defined', function () {
             1 => 'trans(*)',
             2 => 'trans_choice(*)',
         ],
-        'cache' => base_path('tests/Fixtures/test-f/storage/app/scanner.cache'),
         'base_path' => base_path('tests/Fixtures/test-f/module1'),
     ]);
     expect($configs[1])->toBe([
@@ -65,7 +59,6 @@ test('it should return multiple configs when extends are defined', function () {
             1 => 'trans(*)',
             2 => 'trans_choice(*)',
         ],
-        'cache' => base_path('tests/Fixtures/test-f/storage/app/scanner.cache'),
         'base_path' => base_path('tests/Fixtures/test-f/module2'),
     ]);
     expect($configs[2])->toBe([
@@ -81,7 +74,6 @@ test('it should return multiple configs when extends are defined', function () {
             1 => 'trans(*)',
             2 => 'trans_choice(*)',
         ],
-        'cache' => base_path('tests/Fixtures/test-f/storage/app/scanner.cache'),
         'base_path' => base_path('tests/Fixtures/test-f/module3/module4'),
     ]);
     expect($configs[3])->toBe([
@@ -97,7 +89,6 @@ test('it should return multiple configs when extends are defined', function () {
             1 => 'trans(*)',
             2 => 'trans_choice(*)',
         ],
-        'cache' => base_path('tests/Fixtures/test-f/storage/app/scanner.cache'),
         'base_path' => base_path('tests/Fixtures/test-f/module3/module5'),
     ]);
 });

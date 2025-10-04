@@ -2,10 +2,6 @@
 
 use App\Actions\Base\DuplicateScanner;
 
-beforeEach(function () {
-    $this->setStaticProperty(DuplicateScanner::class, 'cache', []);
-});
-
 test('it should check if remove is enabled via option', function () {
     console('default', ['--remove' => true]);
 

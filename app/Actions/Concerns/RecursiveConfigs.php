@@ -7,11 +7,6 @@ use App\Repositories\ConfigurationJsonRepository;
 class RecursiveConfigs
 {
     /**
-     * The cache path.
-     */
-    protected static ?string $cache = null;
-
-    /**
      * The configuration repository instance.
      */
     protected ConfigurationJsonRepository $repository;
@@ -30,22 +25,10 @@ class RecursiveConfigs
      */
     public function execute(): array
     {
-        $this->getCache();
-
         $scanner = $this->getScanner();
         $extends = $this->getExtends();
 
         return array_merge($scanner, ...$extends);
-    }
-
-    /**
-     * Get the cache path (if defined).
-     */
-    private function getCache(): void
-    {
-        if ($cache = $this->repository->cache()) {
-            static::$cache = dirname($this->path).'/'.trim($cache, '/');
-        }
     }
 
     /**
@@ -57,7 +40,6 @@ class RecursiveConfigs
 
         return collect($scanner)->map(function (array $config) {
             return array_merge($config, [
-                'cache' => static::$cache,
                 'base_path' => dirname($this->path),
             ]);
         })->toArray();
