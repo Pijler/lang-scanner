@@ -2,7 +2,6 @@
 
 namespace App\Actions\Concerns;
 
-use App\Repositories\CacheRepository;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
 use Symfony\Component\Console\Input\InputInterface;
@@ -41,14 +40,6 @@ trait BaseMethods
         | JSON_UNESCAPED_SLASHES;
 
     /**
-     * Sets the paths to scan.
-     */
-    public function setPaths(array $paths): void
-    {
-        $this->paths = $paths;
-    }
-
-    /**
      * Checks if the translations should be dotted.
      */
     protected function dotted(): bool
@@ -62,6 +53,16 @@ trait BaseMethods
     protected function sorted(): bool
     {
         return $this->config['sort'] ?? $this->input->getOption('sort');
+    }
+
+    /**
+     * Sets the paths to scan.
+     */
+    public function setPaths(array $paths): self
+    {
+        $this->paths = $paths;
+
+        return $this;
     }
 
     /**
@@ -137,8 +138,6 @@ trait BaseMethods
             $content = $this->sortArray($content);
 
             if (! $this->isEqual($file, $content)) {
-                CacheRepository::lastRun();
-
                 $contents = json_encode($content, $this->flags);
 
                 File::put($file->getRealPath(), $contents, LOCK_EX);
