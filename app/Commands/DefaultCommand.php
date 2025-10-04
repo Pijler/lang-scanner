@@ -5,6 +5,7 @@ namespace App\Commands;
 use App\Actions\ElaborateSummary;
 use App\Actions\Scanner;
 use LaravelZero\Framework\Commands\Command;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 
 class DefaultCommand extends Command
@@ -27,6 +28,7 @@ class DefaultCommand extends Command
         parent::configure();
 
         $this->setDefinition([
+            new InputArgument('path', InputArgument::IS_ARRAY, 'The path to fix'),
             new InputOption('dot', '', InputOption::VALUE_NONE, 'Output the translation tree in DOT format'),
             new InputOption('diff', '', InputOption::VALUE_REQUIRED, 'Only check files that have changed since branching off from the given branch', null, ['main', 'master', 'origin/main', 'origin/master']),
             new InputOption('sort', '', InputOption::VALUE_REQUIRED, 'Sort the translations by key in check mode', true),
