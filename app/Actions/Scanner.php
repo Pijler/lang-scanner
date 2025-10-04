@@ -9,7 +9,6 @@ use App\Actions\Base\UpdateScanner;
 use App\Actions\Concerns\RecursiveConfigs;
 use App\Output\ProgressOutput;
 use App\Project;
-use App\Repositories\CacheRepository;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -54,15 +53,10 @@ class Scanner
         protected OutputInterface $output,
         protected ProgressOutput $progressOutput,
     ) {
-        $this->check = resolve(CheckScanner::class);
-        $this->merge = resolve(MergeScanner::class);
-        $this->update = resolve(UpdateScanner::class);
-        $this->duplicate = resolve(DuplicateScanner::class);
-
-        $this->check->setPaths($this->paths);
-        $this->merge->setPaths($this->paths);
-        $this->update->setPaths($this->paths);
-        $this->duplicate->setPaths($this->paths);
+        $this->check = resolve(CheckScanner::class)->setPaths($this->paths);
+        $this->merge = resolve(MergeScanner::class)->setPaths($this->paths);
+        $this->update = resolve(UpdateScanner::class)->setPaths($this->paths);
+        $this->duplicate = resolve(DuplicateScanner::class)->setPaths($this->paths);
     }
 
     /**
@@ -73,8 +67,6 @@ class Scanner
         $configs = $this->getConfigs();
 
         collect($configs)->each(function (array $config) {
-            CacheRepository::initializeCache($config);
-
             $mode = match (true) {
                 $this->merged($config) => 'merge',
                 $this->checked($config) => 'check',

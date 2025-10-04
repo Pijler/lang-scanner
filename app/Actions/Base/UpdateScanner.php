@@ -5,7 +5,6 @@ namespace App\Actions\Base;
 use App\Actions\Concerns\BaseMethods;
 use App\Enum\Status;
 use App\Output\ProgressOutput;
-use App\Repositories\CacheRepository;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
@@ -105,36 +104,34 @@ class UpdateScanner
      */
     private function extractTranslationKeysFromFile(SplFileInfo $file): array
     {
-        return CacheRepository::cacheFile($file, function (SplFileInfo $file) {
-            $content = $file->getContents();
+        $content = $file->getContents();
 
-            abort_unless(
-                code: 1,
-                boolean: isset($this->config['methods']),
-                message: 'Methods are not set in config.',
-            );
+        abort_unless(
+            code: 1,
+            boolean: isset($this->config['methods']),
+            message: 'Methods are not set in config.',
+        );
 
-            return collect($this->config['methods'])->map(function ($method) {
-                $pattern = explode('*', $method);
+        return collect($this->config['methods'])->map(function ($method) {
+            $pattern = explode('*', $method);
 
-                $end = preg_quote(data_get($pattern, 1, ''), '/');
-                $start = preg_quote(data_get($pattern, 0, ''), '/');
+            $end = preg_quote(data_get($pattern, 1, ''), '/');
+            $start = preg_quote(data_get($pattern, 0, ''), '/');
 
-                return $end !== ''
-                    ? "/(?<![A-Za-z0-9_]){$start}(.*?){$end}/s"
-                    : "/(?<![A-Za-z0-9_]){$start}.*?['\"](.*?)['\"]/s";
-            })->flatMap(function ($pattern) use ($content) {
-                preg_match_all($pattern, $content, $matches);
+            return $end !== ''
+                ? "/(?<![A-Za-z0-9_]){$start}(.*?){$end}/s"
+                : "/(?<![A-Za-z0-9_]){$start}.*?['\"](.*?)['\"]/s";
+        })->flatMap(function ($pattern) use ($content) {
+            preg_match_all($pattern, $content, $matches);
 
-                return $matches[1] ?? [];
-            })->filter()->map(function ($match) {
-                $match = trim($match);
+            return $matches[1] ?? [];
+        })->filter()->map(function ($match) {
+            $match = trim($match);
 
-                $match = $this->extractQuotedString($match);
+            $match = $this->extractQuotedString($match);
 
-                return with($match, fn ($m) => trim($m, " \t\n\r\0\x0B'\""));
-            })->filter()->unique()->values()->toArray();
-        });
+            return with($match, fn ($m) => trim($m, " \t\n\r\0\x0B'\""));
+        })->filter()->unique()->values()->toArray();
     }
 
     /**
