@@ -1,0 +1,58 @@
+name: Publish the released PHAR
+
+on:
+  release:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      tag:
+        required: true
+        description: 'Tag release version'
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    name: Release PHAR
+
+    steps:
+      - name: Extract the tag version
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            GITHUB_REF=${{ github.event.inputs.tag }}
+          fi
+          echo "tag=${GITHUB_REF##*v}" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout the code
+        uses: actions/checkout@v4
+        with:
+          ref: v${{ steps.tag.outputs.tag }}
+
+      - name: Setup PHP, with Composer and Extensions
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          tools: composer:v2
+          coverage: none
+
+      - name: Install Composer Dependencies
+        run: |
+          composer install --no-scripts
+
+      - name: Create the PHAR file.
+        run: ./scanner app:build scanner.phar --build-version=${{ steps.tag.outputs.tag }}
+
+      - name: Upload the PHAR artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: scanner.phar
+          path: builds/scanner.phar
+
+      - name: Upload the PHAR to release
+        run: gh release upload v${{ steps.tag.outputs.tag }} builds/scanner.phar
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
