@@ -11,6 +11,7 @@
             "methods": [
                 "__(*)",
                 "trans(*)",
+                "$title = *",
                 "trans_choice(*)"
             ]
         }
