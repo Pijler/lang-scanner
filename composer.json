@@ -15,16 +15,16 @@
         }
     ],
     "require": {
-        "php": "^8.2",
+        "php": "^8.3",
         "ext-json": "*"
     },
     "require-dev": {
-        "illuminate/view": "^11.45",
-        "laravel-zero/framework": "^11.45",
-        "laravel/pint": "^1.24",
+        "illuminate/view": "^12.55",
+        "laravel-zero/framework": "^12.1",
+        "laravel/pint": "^1.29",
         "mockery/mockery": "^1.6",
-        "nunomaduro/termwind": "^2.3",
-        "pestphp/pest": "^3.8"
+        "nunomaduro/termwind": "^2.4",
+        "pestphp/pest": "^4.4"
     },
     "autoload": {
         "psr-4": {
