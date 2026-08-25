@@ -1,4 +1,10 @@
-# 📌 Lang Scanner
+<p align="center">
+<img src="https://raw.githubusercontent.com/Pijler/docs/main/assets/pijler-icon-dark.svg" height="100" alt="Pijler logo">
+</p>
+
+<h2><p align="center">Lang Scanner</p></h2>
+
+### 🚀 Introduction
 
 A **universal translation key scanner** designed for **Laravel projects**.
 
@@ -233,4 +239,4 @@ Any improvement or correction can open a PR or Issue.
 
 Open-source under the [MIT license](LICENSE).
 
-## 🚀 Thanks!
+### 🚀 Thanks!
