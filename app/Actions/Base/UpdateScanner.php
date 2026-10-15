@@ -18,6 +18,11 @@ class UpdateScanner
     use BaseMethods;
 
     /**
+     * The keys used in code, and the config, grouped by language path.
+     */
+    protected array $usedKeys = [];
+
+    /**
      * Creates a new Scanner instance.
      */
     public function __construct(
@@ -59,6 +64,8 @@ class UpdateScanner
             $collectedKeys = array_merge($collectedKeys, $keys);
         });
 
+        $this->rememberUsedKeys($collectedKeys);
+
         $newTranslations = $this->returnNewTranslations($translations, $collectedKeys);
 
         if (filled($newTranslations)) {
@@ -67,22 +74,99 @@ class UpdateScanner
     }
 
     /**
+     * Finds the translations that are not used in code, removing them when pruning.
+     */
+    public function unused(bool $prune): array
+    {
+        $changes = [];
+
+        foreach ($this->usedKeys as ['config' => $config, 'keys' => $keys]) {
+            $this->config = $config;
+
+            $used = array_fill_keys($keys, true);
+
+            collect($this->getFiles())
+                ->filter(function (SplFileInfo $file) {
+                    return $file->getExtension() === 'json';
+                })
+                ->each(function (SplFileInfo $file) use ($prune, $used, &$changes) {
+                    [$content, $removed] = $this->removeUnusedKeys($this->decodeFile($file), $used);
+
+                    if (blank($removed)) {
+                        return;
+                    }
+
+                    if ($prune) {
+                        $this->putContent($file, $content);
+                    }
+
+                    $changes[] = [
+                        'unused' => true,
+                        'check' => ! $prune,
+                        'issues' => $removed,
+                        'count' => count($removed),
+                        'file' => $file->getRealPath(),
+                    ];
+                });
+        }
+
+        return $changes;
+    }
+
+    /**
+     * Remembers the keys used in code for the current language path.
+     */
+    private function rememberUsedKeys(array $keys): void
+    {
+        $langPath = $this->config['base_path'].'/'.$this->config['lang_path'];
+
+        $langPath = realpath($langPath) ?: $langPath;
+
+        $this->usedKeys[$langPath] = [
+            'config' => $this->usedKeys[$langPath]['config'] ?? $this->config,
+            'keys' => array_merge($this->usedKeys[$langPath]['keys'] ?? [], $keys),
+        ];
+    }
+
+    /**
+     * Removes the keys that are not used, returning the content and the removed keys.
+     */
+    private function removeUnusedKeys(array $content, array $used, string $prefix = ''): array
+    {
+        $removed = [];
+
+        foreach ($content as $key => $value) {
+            $fullKey = $prefix === '' ? (string) $key : "{$prefix}.{$key}";
+
+            if (isset($used[$fullKey])) {
+                continue;
+            }
+
+            if (is_array($value) && filled($value)) {
+                [$content[$key], $children] = $this->removeUnusedKeys($value, $used, $fullKey);
+
+                $removed = array_merge($removed, $children);
+
+                if (blank($content[$key])) {
+                    unset($content[$key]);
+                }
+
+                continue;
+            }
+
+            unset($content[$key]);
+
+            $removed[] = $fullKey;
+        }
+
+        return [$content, $removed];
+    }
+
+    /**
      * Get files to scan based on configuration.
      */
     private function getFilesToScan(): Collection
     {
-        abort_unless(
-            code: 1,
-            message: 'Extensions are not set.',
-            boolean: isset($this->config['extensions']),
-        );
-
-        abort_unless(
-            code: 1,
-            message: 'Config paths are not set.',
-            boolean: isset($this->config['base_path'], $this->config['paths']),
-        );
-
         return collect($this->config['paths'])
             ->map(function ($path) {
                 $fullPath = $this->config['base_path'].'/'.$path;
@@ -105,12 +189,6 @@ class UpdateScanner
     private function extractTranslationKeysFromFile(SplFileInfo $file): array
     {
         $content = $file->getContents();
-
-        abort_unless(
-            code: 1,
-            boolean: isset($this->config['methods']),
-            message: 'Methods are not set in config.',
-        );
 
         return collect($this->config['methods'])->map(function ($method) {
             $pattern = explode('*', $method);

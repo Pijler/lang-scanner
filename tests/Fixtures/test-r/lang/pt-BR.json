@@ -1,0 +1,15 @@
+{
+    "Old key.": "Chave antiga.",
+    "group": {
+        "unused": "Grupo Não Usado",
+        "used": "Grupo Usado"
+    },
+    "js": {
+        "used": "JS Usado"
+    },
+    "menu": {
+        "home": "Início"
+    },
+    "unused": "Não Usado",
+    "used": "Usado"
+}

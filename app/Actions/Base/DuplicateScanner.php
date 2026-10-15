@@ -98,15 +98,9 @@ class DuplicateScanner
      */
     private function getCacheKey(SplFileInfo $file): string
     {
-        abort_unless(
-            code: 1,
-            boolean: isset($this->config['methods']),
-            message: 'Missing "methods" configuration for duplicate scanner.',
-        );
-
         return md5(json_encode([
             'filename' => $file->getFilename(),
-            'methods' => data_get($this->config, 'methods', []),
+            'methods' => $this->config['methods'],
         ]));
     }
 
@@ -140,8 +134,8 @@ class DuplicateScanner
 
                 $this->changes[] = [
                     'file' => $file->getRealPath(),
-                    'count' => count($diff) + count($duplicates),
                     'issues' => array_merge($diff, $duplicates),
+                    'count' => count($diff) + count($duplicates),
                 ];
 
                 $this->updateCache($cacheKey, $merged);

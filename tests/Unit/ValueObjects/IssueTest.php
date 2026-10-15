@@ -63,3 +63,29 @@ test('it should return the file path', function () {
 
     expect($issue->file())->toBe('file.php');
 });
+
+test('it should describe unused translations', function () {
+    $issue = new Issue(
+        count: 2,
+        check: true,
+        path: '/app',
+        unused: true,
+        changes: ['a', 'b'],
+        file: '/app/lang/en.json',
+    );
+
+    expect($issue->failing())->toBeTrue();
+    expect($issue->description())->toBe('Unused: a, b');
+
+    $issue = new Issue(
+        count: 2,
+        check: false,
+        path: '/app',
+        unused: true,
+        changes: ['a', 'b'],
+        file: '/app/lang/en.json',
+    );
+
+    expect($issue->failing())->toBeFalse();
+    expect($issue->description())->toBe('Removed: a, b');
+});
