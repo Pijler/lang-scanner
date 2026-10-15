@@ -1,6 +1,7 @@
 <?php
 
 use App\Actions\Base\DuplicateScanner;
+use App\Actions\Scanner;
 
 beforeEach(function () {
     $this->setStaticProperty(DuplicateScanner::class, 'cache', []);
@@ -114,4 +115,23 @@ test('it should return empty duplicates if no cache', function () {
 
     expect($duplicates)->toBeEmpty();
     expect($result)->toEqual($current);
+});
+
+test('it should report every missing and duplicate key as an issue', function () {
+    run('default', [
+        '--duplicate' => true,
+        '--config' => base_path('tests/Fixtures/test-o/scanner.json'),
+    ]);
+
+    $duplicateScanner = $this->callProperty(resolve(Scanner::class), 'duplicate');
+
+    $changes = $this->callProperty($duplicateScanner, 'changes');
+
+    expect($changes)->not->toBeEmpty();
+
+    foreach ($changes as $change) {
+        expect($change['issues'])->toHaveCount($change['count']);
+    }
+
+    expect($changes[1]['issues'])->toBe(['own', 'shared']);
 });

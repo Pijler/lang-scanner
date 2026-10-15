@@ -80,7 +80,7 @@ class UpdateScanner
         abort_unless(
             code: 1,
             message: 'Config paths are not set.',
-            boolean: isset($this->config['base_path']),
+            boolean: isset($this->config['base_path'], $this->config['paths']),
         );
 
         return collect($this->config['paths'])
@@ -124,44 +124,26 @@ class UpdateScanner
         })->flatMap(function ($pattern) use ($content) {
             preg_match_all($pattern, $content, $matches);
 
-            return $matches[1] ?? [];
-        })->filter()->map(function ($match) {
-            $match = trim($match);
-
-            $match = $this->extractQuotedString($match);
-
-            return with($match, fn ($m) => trim($m, " \t\n\r\0\x0B'\""));
-        })->filter()->unique()->values()->toArray();
+            return $matches[3] ?? [];
+        })->map(function ($match) {
+            return $this->unescape($match);
+        })->filter(fn ($match) => $match !== '')->unique()->values()->toArray();
     }
 
     /**
-     * Extracts the "best" quoted string from a match.
+     * Removes the escaping backslashes from a quoted string content.
      */
-    private function extractQuotedString(string $match): ?string
+    private function unescape(string $content): string
     {
-        if (! str_starts_with($match, "'") && ! str_starts_with($match, '"')) {
-            return null;
-        }
+        return preg_replace('/\\\\([\\\\\'"])/', '$1', $content);
+    }
 
-        if (! preg_match_all('/([\'"])((?:\\\\.|(?!\1).)*?)\1/s', $match, $all, PREG_SET_ORDER)) {
-            return null;
-        }
-
-        $best = collect($all)->reduce(function (?string $carry, array $m) {
-            $content = $m[2];
-
-            if ($content === '') {
-                return $carry;
-            }
-
-            if ($carry === null || strlen($content) > strlen($carry)) {
-                return $content;
-            }
-
-            return $carry;
-        });
-
-        return filled($best) ? stripcslashes($best) : null;
+    /**
+     * Determine if the given key should be expanded into a nested structure.
+     */
+    private function isNestedKey(string $key): bool
+    {
+        return preg_match('/^[^\s.]+(\.[^\s.]+)*$/', $key) === 1;
     }
 
     /**
@@ -176,7 +158,7 @@ class UpdateScanner
                 return $file->getExtension() === 'json';
             })
             ->map(function (SplFileInfo $file) use ($new) {
-                $old = json_decode($file->getContents(), true);
+                $old = $this->decodeFile($file);
 
                 [$merged, $diff] = $this->diffTranslations($old, $new);
 
@@ -196,20 +178,19 @@ class UpdateScanner
     private function returnNewTranslations(array $translations, array $collectedKeys): array
     {
         $newEntries = collect($collectedKeys)
-            ->map(fn ($key) => stripslashes($key))
             ->reject(fn ($key) => Arr::has($translations, $key))
-            ->partition(fn ($key) => ! str_contains($key, ' '))
+            ->partition(fn ($key) => $this->isNestedKey($key))
             ->pipe(function ($partitions) {
-                [$noSpaces, $withSpaces] = $partitions;
+                [$nested, $literal] = $partitions;
 
-                $undotted = $noSpaces
+                $undotted = $nested
                     ->mapWithKeys(fn ($key) => [$key => ''])
                     ->undot();
 
-                $spaced = $withSpaces
+                $literal = $literal
                     ->mapWithKeys(fn ($key) => [$key => '']);
 
-                return $undotted->toArray() + $spaced->toArray();
+                return $undotted->toArray() + $literal->toArray();
             });
 
         return array_replace_recursive($translations, $newEntries);

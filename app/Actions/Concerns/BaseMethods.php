@@ -52,7 +52,9 @@ trait BaseMethods
      */
     protected function sorted(): bool
     {
-        return $this->config['sort'] ?? $this->input->getOption('sort');
+        $sort = $this->config['sort'] ?? $this->input->getOption('sort');
+
+        return filter_var($sort, FILTER_VALIDATE_BOOLEAN);
     }
 
     /**
@@ -100,9 +102,31 @@ trait BaseMethods
      */
     private function isEqual(SplFileInfo $file, array $content): bool
     {
-        $contents = json_decode($file->getContents(), true);
+        $contents = $this->decodeFile($file);
 
         return json_encode($contents) === json_encode($content);
+    }
+
+    /**
+     * Decodes the JSON content of the given translation file.
+     */
+    protected function decodeFile(SplFileInfo $file): array
+    {
+        $contents = $file->getContents();
+
+        if (blank($contents)) {
+            return [];
+        }
+
+        $decoded = json_decode($contents, true);
+
+        abort_unless(
+            code: 1,
+            boolean: is_array($decoded),
+            message: sprintf('The translation file [%s] is not valid JSON.', $file->getRealPath()),
+        );
+
+        return $decoded;
     }
 
     /**
@@ -173,7 +197,7 @@ trait BaseMethods
                 return $file->getExtension() === 'json';
             })
             ->map(function (SplFileInfo $file) {
-                return json_decode($file->getContents(), true);
+                return $this->decodeFile($file);
             })
             ->reduce(function (array $carry, array $item) {
                 return array_replace_recursive($carry, $this->extractKeys($item));

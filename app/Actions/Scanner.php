@@ -112,7 +112,13 @@ class Scanner
      */
     private function getConfigs(): array
     {
-        $path = $this->input->getOption('config') ?: Project::path().'/scanner.json';
+        $path = $this->input->getOption('config');
+
+        if (filled($path)) {
+            $path = realpath($path) ?: abort(1, "The configuration file [{$path}] does not exist.");
+        }
+
+        $path = $path ?: Project::path().'/scanner.json';
 
         return (new RecursiveConfigs($path))->execute();
     }
