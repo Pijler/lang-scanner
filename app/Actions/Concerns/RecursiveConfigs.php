@@ -3,6 +3,7 @@
 namespace App\Actions\Concerns;
 
 use App\Repositories\ConfigurationJsonRepository;
+use Illuminate\Support\Facades\File;
 
 class RecursiveConfigs
 {
@@ -16,6 +17,7 @@ class RecursiveConfigs
      */
     public function __construct(
         protected string $path,
+        protected array $visited = [],
     ) {
         $this->repository = new ConfigurationJsonRepository($path);
     }
@@ -55,7 +57,23 @@ class RecursiveConfigs
         return collect($extends)->map(function (string $extension) {
             $path = dirname($this->path).'/'.trim($extension, '/');
 
-            return (new RecursiveConfigs($path))->execute();
+            abort_unless(
+                code: 1,
+                boolean: File::exists($path),
+                message: "The extended configuration file [{$path}] does not exist.",
+            );
+
+            $path = realpath($path);
+
+            $visited = [...$this->visited, realpath($this->path) ?: $this->path];
+
+            abort_if(
+                code: 1,
+                boolean: in_array($path, $visited, true),
+                message: "Circular extends detected in configuration file [{$path}].",
+            );
+
+            return (new RecursiveConfigs($path, $visited))->execute();
         })->toArray();
     }
 }

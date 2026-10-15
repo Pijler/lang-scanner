@@ -41,7 +41,7 @@ class CheckScanner
      */
     protected function noEmpty(): bool
     {
-        return $this->input->getOption('no-empty');
+        return $this->config['no-empty'] ?? $this->input->getOption('no-empty');
     }
 
     /**
@@ -66,7 +66,7 @@ class CheckScanner
             ->map(function (SplFileInfo $file) use ($new) {
                 $this->totalFiles++;
 
-                $old = json_decode($file->getContents(), true);
+                $old = $this->decodeFile($file);
 
                 [$merged, $diff] = $this->diffTranslations($old, $new);
 

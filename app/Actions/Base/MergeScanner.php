@@ -50,7 +50,7 @@ class MergeScanner
             ->map(function (SplFileInfo $file) use ($new) {
                 $this->totalFiles++;
 
-                $old = json_decode($file->getContents(), true);
+                $old = $this->decodeFile($file);
 
                 [$merged, $diff] = $this->diffTranslations($old, $new);
 

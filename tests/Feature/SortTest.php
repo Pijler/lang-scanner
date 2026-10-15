@@ -278,3 +278,18 @@ test('it should run default command (test-e)', function () {
         ],
     ]);
 });
+
+test('it should not sort the translations when sort is false (test-k)', function () {
+    [$status, $output] = run('default', [
+        '--check' => true,
+        '--sort' => 'false',
+        '--config' => base_path('tests/Fixtures/test-k/scanner.json'),
+    ]);
+
+    expect($status)->toBe(1);
+
+    expect(array_keys(getContent(base_path('tests/Fixtures/test-k/lang/en-US.json'))))->toBe([
+        'zeta',
+        'alpha',
+    ]);
+});

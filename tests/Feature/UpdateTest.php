@@ -354,3 +354,38 @@ test('it should run default command (test-e)', function () {
         ],
     ]);
 });
+
+test('it should keep edge case keys intact (test-k)', function () {
+    [$status, $output] = run('default', [
+        '--config' => base_path('tests/Fixtures/test-k/scanner.json'),
+    ]);
+
+    expect($status)->toBe(1);
+    expect($output)->toContain('SCANNED', '1 file');
+
+    expect(getContent(base_path('tests/Fixtures/test-k/lang/en-US.json')))->toBe([
+        ' Padded ' => '',
+        'It\'s here' => '',
+        'Ok.' => '',
+        'Path C:\\new' => '',
+        'alpha' => 'Alpha',
+        'e.g.' => '',
+        'menu' => [
+            'home' => '',
+        ],
+        'zeta' => 'Zeta',
+    ]);
+
+    expect(getContent(base_path('tests/Fixtures/test-k/lang/pt-BR.json')))->toBe([
+        ' Padded ' => '',
+        'It\'s here' => '',
+        'Ok.' => '',
+        'Path C:\\new' => '',
+        'alpha' => '',
+        'e.g.' => '',
+        'menu' => [
+            'home' => '',
+        ],
+        'zeta' => '',
+    ]);
+});

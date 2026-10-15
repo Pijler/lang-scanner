@@ -1,0 +1,5 @@
+{
+    "extends": [
+        "/missing/scanner.json"
+    ]
+}
