@@ -36,7 +36,9 @@ class SummaryOutput
         render((string) view('summary', [
             'issues' => $issues,
             'totalFiles' => $totalFiles,
-            'testing' => $this->input->getOption('check') || collect($changes)->contains('check', true),
+            'details' => $this->getDetails($changes),
+            'dryRun' => $this->input->getOption('dry-run'),
+            'failing' => $issues->contains(fn (Issue $issue) => $issue->failing()),
         ]));
 
         foreach ($issues as $issue) {
@@ -47,6 +49,27 @@ class SummaryOutput
         }
 
         $this->output->writeln('');
+    }
+
+    /**
+     * Gets the description of each kind of change.
+     */
+    public function getDetails(array $changes): array
+    {
+        $count = fn (callable $filter) => collect($changes)->filter($filter)->sum('count');
+
+        $details = [
+            'Missing %d %s' => $count(fn ($change) => ($change['check'] ?? false) && ! ($change['unused'] ?? false)),
+            'New %d %s scanned' => $count(fn ($change) => ! ($change['check'] ?? false) && ! ($change['unused'] ?? false)),
+            '%d unused %s' => $count(fn ($change) => ($change['check'] ?? false) && ($change['unused'] ?? false)),
+            'Removed %d unused %s' => $count(fn ($change) => ! ($change['check'] ?? false) && ($change['unused'] ?? false)),
+        ];
+
+        return collect($details)
+            ->filter()
+            ->map(fn ($total, $format) => sprintf($format, $total, str('translation')->plural($total)))
+            ->values()
+            ->all();
     }
 
     /**
@@ -62,6 +85,7 @@ class SummaryOutput
             count: data_get($change, 'count'),
             changes: data_get($change, 'issues'),
             check: data_get($change, 'check', false),
+            unused: data_get($change, 'unused', false),
         ))->values();
     }
 }
