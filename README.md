@@ -25,6 +25,9 @@ Although it’s a Laravel package, it’s flexible enough to scan translations f
 -   🔀 `merge` or `--merge` combines duplicate or related translations into a single entry.
 -   📝 `--duplicate` lists all duplicate translations for review.
 -   ❌ `--remove` removes duplicate translations, keeping only the main version, when running `duplicate`.
+-   🧹 `--unused` lists translations that are not used in code, and `--prune` removes them.
+-   👀 `--dry-run` shows what would change without changing any file.
+-   🛡️ Validates `scanner.json` with clear error messages.
 
 ### 📦 Installation
 
@@ -210,6 +213,61 @@ After identifying duplicate records, automatically removes the repeated entries,
 ```bash
     ./vendor/bin/scanner --duplicate --remove
 ```
+
+#### `--unused`
+
+Lists the translations that exist in the JSON files but are not used in the scanned files.
+
+The scan fails when unused translations are found, so it can be used in CI/CD pipelines.
+
+```bash
+    ./vendor/bin/scanner --unused
+```
+
+Using a key as a group (e.g. `__('menu')`) keeps all of its nested keys.
+
+> Keys built at runtime (e.g. `__("status.$status")`) can't be detected, so they are reported as unused.
+
+#### `--prune`
+
+Removes the translations that are not used in the scanned files, from every language file.
+
+```bash
+    ./vendor/bin/scanner --prune
+```
+
+`--unused` and `--prune` need to scan the whole project, so they can't be combined with `--dirty`, `--diff` or paths.
+
+Configs that share the same `lang_path` are checked together, so a key used only by one of them is kept.
+
+#### `--dry-run`
+
+Runs any mode without changing files, showing only what would change.
+
+```bash
+    ./vendor/bin/scanner --prune --dry-run
+```
+
+### 🛡️ Configuration validation
+
+The `scanner.json` is validated before any file is changed.
+
+Unknown keys, wrong types and missing options fail with a clear message:
+
+```
+Invalid configuration [/app/scanner.json]: unknown key [lang-path] in [scanner[0]].
+```
+
+The options required by each mode are:
+
+| Mode        | Required options                              |
+| ----------- | --------------------------------------------- |
+| `update`    | `lang_path`, `paths`, `extensions`, `methods` |
+| `duplicate` | `lang_path`, `methods`                        |
+| `check`     | `lang_path`                                   |
+| `merge`     | `lang_path`                                   |
+
+Each method must contain exactly one `*` placeholder (e.g. `__(*)`).
 
 ### 🧩 Extensibility with extends
 

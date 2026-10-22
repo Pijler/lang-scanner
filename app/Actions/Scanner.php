@@ -9,6 +9,7 @@ use App\Actions\Base\UpdateScanner;
 use App\Actions\Concerns\RecursiveConfigs;
 use App\Output\ProgressOutput;
 use App\Project;
+use App\Validators\ConfigurationValidator;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -41,6 +42,7 @@ class Scanner
         'check' => ['files' => 0, 'changes' => []],
         'merge' => ['files' => 0, 'changes' => []],
         'update' => ['files' => 0, 'changes' => []],
+        'unused' => ['files' => 0, 'changes' => []],
         'duplicate' => ['files' => 0, 'changes' => []],
     ];
 
@@ -64,9 +66,7 @@ class Scanner
      */
     public function execute(): array
     {
-        $configs = $this->getConfigs();
-
-        collect($configs)->each(function (array $config) {
+        $configs = collect($this->getConfigs())->map(function (array $config) {
             $mode = match (true) {
                 $this->merged($config) => 'merge',
                 $this->checked($config) => 'check',
@@ -74,13 +74,57 @@ class Scanner
                 default => 'update',
             };
 
+            ConfigurationValidator::validateMode($config, $mode);
+
+            return [$mode, $config];
+        });
+
+        if ($this->unused()) {
+            $this->ensureFullScan();
+        }
+
+        $configs->each(function (array $item) {
+            [$mode, $config] = $item;
+
             $this->runScanner($mode, $config);
         });
+
+        if ($this->unused()) {
+            data_set($this->stats, 'unused.changes', $this->update->unused($this->prune()));
+        }
 
         return [
             collect($this->stats)->pluck('files')->sum(),
             collect($this->stats)->pluck('changes')->collapse()->toArray(),
         ];
+    }
+
+    /**
+     * Checks if the unused translations should be reported.
+     */
+    private function unused(): bool
+    {
+        return $this->input->getOption('unused') || $this->prune();
+    }
+
+    /**
+     * Checks if the unused translations should be removed.
+     */
+    private function prune(): bool
+    {
+        return $this->input->getOption('prune');
+    }
+
+    /**
+     * Ensures that the whole project is scanned, otherwise used keys would be missed.
+     */
+    private function ensureFullScan(): void
+    {
+        abort_if(
+            code: 1,
+            message: 'The [--unused] and [--prune] options cannot be combined with [--dirty], [--diff] or paths.',
+            boolean: $this->input->getOption('dirty') || filled($this->input->getOption('diff')) || filled($this->input->getArgument('path')),
+        );
     }
 
     /**

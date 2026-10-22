@@ -1,0 +1,28 @@
+{
+    "scanner": [
+        {
+            "lang_path": "lang/",
+            "paths": [
+                "resources/php/"
+            ],
+            "extensions": [
+                ".php"
+            ],
+            "methods": [
+                "__(*)"
+            ]
+        },
+        {
+            "lang_path": "lang/",
+            "paths": [
+                "resources/js/"
+            ],
+            "extensions": [
+                ".js"
+            ],
+            "methods": [
+                "$t(*)"
+            ]
+        }
+    ]
+}

@@ -15,6 +15,7 @@ class Issue
         protected string $path,
         protected string $file,
         protected array $changes,
+        protected bool $unused = false,
     ) {}
 
     /**
@@ -46,7 +47,21 @@ class Issue
      */
     public function description(): string
     {
-        return collect($this->changes)->implode(', ');
+        $description = collect($this->changes)->implode(', ');
+
+        if (! $this->unused) {
+            return $description;
+        }
+
+        return ($this->check ? 'Unused: ' : 'Removed: ').$description;
+    }
+
+    /**
+     * Determine if the issue should fail the scan.
+     */
+    public function failing(): bool
+    {
+        return $this->check;
     }
 
     /**

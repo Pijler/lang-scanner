@@ -57,8 +57,8 @@ class GitPathsRepository implements PathsRepository
     {
         $files = [
             'unstaged' => $this->run(['git', 'diff', '--name-only', '-z', '--diff-filter=AM']),
-            'untracked' => $this->run(['git', 'ls-files', '-z', '--full-name', '--others', '--exclude-standard']),
             'staged' => $this->run(['git', 'diff', '--name-only', '-z', '--diff-filter=AM', '--cached']),
+            'untracked' => $this->run(['git', 'ls-files', '-z', '--full-name', '--others', '--exclude-standard']),
             'committed' => $this->run(['git', 'diff', '--name-only', '-z', '--diff-filter=AM', "{$branch}...HEAD"]),
         ];
 

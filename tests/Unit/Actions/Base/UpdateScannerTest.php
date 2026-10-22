@@ -1,7 +1,6 @@
 <?php
 
 use App\Actions\Base\UpdateScanner;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
 use Symfony\Component\Finder\SplFileInfo;
 
@@ -9,26 +8,6 @@ test('it should return files to scan', function () {
     console('default', []);
 
     $updateScanner = resolve(UpdateScanner::class);
-
-    $this->setProperty($updateScanner, 'config', []);
-
-    rescue(function () use ($updateScanner) {
-        $this->callMethod($updateScanner, 'getFilesToScan');
-    }, function (Exception $e) {
-        expect($e->getCode())->toBe(0);
-        expect($e->getMessage())->toBe('Extensions are not set.');
-    });
-
-    $this->setProperty($updateScanner, 'config', [
-        'extensions' => ['.php'],
-    ]);
-
-    rescue(function () use ($updateScanner) {
-        $this->callMethod($updateScanner, 'getFilesToScan');
-    }, function (Exception $e) {
-        expect($e->getCode())->toBe(0);
-        expect($e->getMessage())->toBe('Config paths are not set.');
-    });
 
     $updateScanner->setPaths([getcwd()]);
 
@@ -51,18 +30,7 @@ test('it should extract translation keys from file', function () {
 
     $updateScanner = resolve(UpdateScanner::class);
 
-    $this->setProperty($updateScanner, 'config', []);
-
     [$fileApp, $fileBase] = File::allFiles(base_path('tests/Fixtures/test-a/resources'));
-
-    rescue(function () use ($fileApp, $fileBase, $updateScanner) {
-        $file = Arr::random([$fileApp, $fileBase]);
-
-        $this->callMethod($updateScanner, 'extractTranslationKeysFromFile', [$file]);
-    }, function (Exception $e) {
-        expect($e->getCode())->toBe(0);
-        expect($e->getMessage())->toBe('Methods are not set in config.');
-    });
 
     $this->setProperty($updateScanner, 'config', scannerConfig(
         base_path('tests/Fixtures/test-a/scanner.json'),

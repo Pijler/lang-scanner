@@ -58,6 +58,18 @@ trait BaseMethods
     }
 
     /**
+     * Checks if the files should not be changed.
+     */
+    protected function dryRun(): bool
+    {
+        if ($this->input->getOption('dry-run')) {
+            return true;
+        }
+
+        return method_exists($this, 'noUpdate') && $this->noUpdate();
+    }
+
+    /**
      * Sets the paths to scan.
      */
     public function setPaths(array $paths): self
@@ -152,20 +164,16 @@ trait BaseMethods
      */
     protected function putContent(SplFileInfo $file, array $content): void
     {
-        if (method_exists($this, 'noUpdate') && $this->noUpdate()) {
+        if ($this->dryRun()) {
             return;
         }
 
-        if (filled($content)) {
-            $content = $this->dotArray($content);
+        $content = $this->sortArray($this->dotArray($content));
 
-            $content = $this->sortArray($content);
+        if (! $this->isEqual($file, $content)) {
+            $contents = blank($content) ? '{}' : json_encode($content, $this->flags);
 
-            if (! $this->isEqual($file, $content)) {
-                $contents = json_encode($content, $this->flags);
-
-                File::put($file->getRealPath(), $contents, LOCK_EX);
-            }
+            File::put($file->getRealPath(), $contents, LOCK_EX);
         }
     }
 
@@ -174,12 +182,6 @@ trait BaseMethods
      */
     protected function getFiles(): array
     {
-        abort_unless(
-            code: 1,
-            message: 'Config paths are not set.',
-            boolean: isset($this->config['base_path'], $this->config['lang_path']),
-        );
-
         return rescue(function () {
             return File::files($this->config['base_path'].'/'.$this->config['lang_path']);
         }, [], false);

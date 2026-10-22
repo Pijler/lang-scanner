@@ -43,3 +43,17 @@ test('it should fail when a translation file is not valid JSON (test-n)', functi
         '--config' => base_path('tests/Fixtures/test-n/scanner.json'),
     ]);
 })->throws(Exception::class, 'is not valid JSON');
+
+test('it should fail on unknown config keys (test-p)', function () {
+    run('default', [
+        '--config' => base_path('tests/Fixtures/test-p/scanner.json'),
+    ]);
+})->throws(Exception::class, 'unknown key [lang-path] in [scanner[0]]');
+
+test('it should validate every config before changing any file (test-q)', function () {
+    expect(fn () => run('default', [
+        '--config' => base_path('tests/Fixtures/test-q/scanner.json'),
+    ]))->toThrow(Exception::class, 'the "update" mode requires the [paths, extensions, methods] options.');
+
+    expect(getContent(base_path('tests/Fixtures/test-q/lang/en-US.json')))->toBe([]);
+});

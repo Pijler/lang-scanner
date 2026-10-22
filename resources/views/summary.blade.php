@@ -16,7 +16,7 @@
           <span class="px-2 bg-green text-gray uppercase font-bold">
             NO ISSUES
           </span>
-        @elseif(!$testing)
+        @elseif(! $failing)
           <span class="px-2 bg-gray text-gray uppercase font-bold">
             SCANNED
           </span>
@@ -33,16 +33,16 @@
           </span>
 
           @if ($issues->isNotEmpty())
-            <span>
-              @if ($testing)
-                , Missing {{ $count }} {{ str('translation')->plural($count) }}
-              @else
-                , New {{ $count }} {{ str('translation')->plural($count) }} scanned
-              @endif
-            </span>
+            <span>, {{ implode(', ', $details) }}</span>
           @endif
         </span>
       </div>
     </span>
   </div>
+
+  @if ($dryRun)
+    <div class="text-yellow">
+      Dry run: no files were changed.
+    </div>
+  @endif
 </div>

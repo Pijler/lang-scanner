@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Validators\ConfigurationValidator;
 use Illuminate\Support\Facades\File;
 
 class ConfigurationJsonRepository
@@ -66,6 +67,8 @@ class ConfigurationJsonRepository
                 if (! is_array($configuration)) {
                     abort(1, sprintf('The configuration file [%s] is not valid JSON.', $this->path));
                 }
+
+                ConfigurationValidator::validateFile($configuration, $this->path);
             });
         }
 
