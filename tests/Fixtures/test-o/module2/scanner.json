@@ -1,0 +1,16 @@
+{
+    "scanner": [
+        {
+            "lang_path": "lang/",
+            "paths": [
+                "resources/"
+            ],
+            "extensions": [
+                ".php"
+            ],
+            "methods": [
+                "__(*)"
+            ]
+        }
+    ]
+}

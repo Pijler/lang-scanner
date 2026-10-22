@@ -46,7 +46,7 @@ class DuplicateScanner
      */
     protected function remove(): bool
     {
-        return $this->input->getOption('remove');
+        return $this->config['remove'] ?? $this->input->getOption('remove');
     }
 
     /**
@@ -126,7 +126,7 @@ class DuplicateScanner
 
                 $cacheKey = $this->getCacheKey($file);
 
-                $old = json_decode($file->getContents(), true);
+                $old = $this->decodeFile($file);
 
                 [$merged, $diff] = $this->diffTranslations($old, $new);
 
@@ -134,18 +134,14 @@ class DuplicateScanner
 
                 $this->putContent($file, $this->remove() ? $result : $merged);
 
-                $status = match (true) {
-                    filled($diff) || filled($duplicates) => Status::ERROR,
-                    blank($diff) && blank($duplicates) => Status::SKIPPED,
-                    default => Status::OK,
-                };
+                $status = blank($diff) && blank($duplicates) ? Status::SKIPPED : Status::ERROR;
 
                 $this->progressOutput->handle($status);
 
                 $this->changes[] = [
                     'file' => $file->getRealPath(),
                     'count' => count($diff) + count($duplicates),
-                    'issues' => array_values($diff) + array_values($duplicates),
+                    'issues' => array_merge($diff, $duplicates),
                 ];
 
                 $this->updateCache($cacheKey, $merged);

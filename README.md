@@ -167,14 +167,14 @@ Saves JSON translations in **dot notation**:
     ./vendor/bin/scanner --dot
 ```
 
-#### `--empty`
+#### `--no-empty`
 
-When using check, you may want to ignore empty translations as finished translations.
+When using check, consider empty translations as missing (not finished).
 
 A good option to use in CI/CD pipelines.
 
 ```bash
-    ./vendor/bin/scanner --check --empty
+    ./vendor/bin/scanner --check --no-empty
 ```
 
 #### `--no-update`

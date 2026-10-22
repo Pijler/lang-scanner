@@ -29,7 +29,7 @@ class ProgressOutput
         protected InputInterface $input,
         protected OutputInterface $output,
     ) {
-        $this->symbolsPerLine = (new Terminal)->getWidth() - 4;
+        $this->symbolsPerLine = max(1, (new Terminal)->getWidth() - 4);
     }
 
     /**
@@ -38,10 +38,6 @@ class ProgressOutput
     public function handle(Status $status): void
     {
         $symbolsOnCurrentLine = $this->processed % $this->symbolsPerLine;
-
-        if ($symbolsOnCurrentLine >= (new Terminal)->getWidth() - 4) {
-            $symbolsOnCurrentLine = 0;
-        }
 
         if ($symbolsOnCurrentLine === 0) {
             $this->output->writeln('');

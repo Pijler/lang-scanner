@@ -36,7 +36,7 @@ class SummaryOutput
         render((string) view('summary', [
             'issues' => $issues,
             'totalFiles' => $totalFiles,
-            'testing' => $this->input->getOption('check'),
+            'testing' => $this->input->getOption('check') || collect($changes)->contains('check', true),
         ]));
 
         foreach ($issues as $issue) {

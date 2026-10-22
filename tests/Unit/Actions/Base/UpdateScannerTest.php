@@ -198,7 +198,7 @@ test('it should return new translations', function () {
     ];
     $collectedKeys = [
         'The app, as you know, is great.',
-        'Click the \":action\" button to open the app.',
+        'Click the ":action" button to open the app.',
         'An app? Yes, an app!',
         "The app's performance can't be beat.",
         "Don't forget to update your app.",

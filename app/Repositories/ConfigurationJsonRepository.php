@@ -39,14 +39,6 @@ class ConfigurationJsonRepository
     ) {}
 
     /**
-     * Get the cache configuration.
-     */
-    public function cache(): ?string
-    {
-        return data_get($this->get(), 'cache');
-    }
-
-    /**
      * Get the scanner configuration.
      */
     public function scanner(): array
@@ -67,7 +59,7 @@ class ConfigurationJsonRepository
      */
     protected function get(): array
     {
-        if (! is_null($this->path) && File::exists($this->path)) {
+        if (File::exists($this->path)) {
             $baseConfig = json_decode(File::get($this->path), true);
 
             return tap($baseConfig, function ($configuration) {
