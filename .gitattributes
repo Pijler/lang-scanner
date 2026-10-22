@@ -20,7 +20,7 @@
 /phpunit.xml.dist export-ignore
 /scanner export-ignore
 /scanner.json export-ignore
-/resources export-ignore
+/resources/views export-ignore
 /src export-ignore
 /storage export-ignore
 /tests export-ignore

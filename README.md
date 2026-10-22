@@ -282,6 +282,19 @@ Use `extends` to reuse configs across modules:
 }
 ```
 
+### 🤖 Laravel Boost
+
+Lang Scanner ships with [Laravel Boost](https://github.com/laravel/boost) support, so AI agents know how to keep your translations in sync.
+
+When you run `boost:install` or `boost:update`, Boost automatically loads:
+
+-   The `lang-scanner` **guideline**, with the main rules and commands.
+-   The `lang-scanner` **skill**, with the full `scanner.json` and CLI reference.
+
+```bash
+    php artisan boost:install
+```
+
 ### 💡 Best practices
 
 -   Configure `methods` according to your framework (`__(*)`/`trans(*)` for Laravel, `t(*)` for Vue/React).
