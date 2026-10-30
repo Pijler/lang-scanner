@@ -51,9 +51,11 @@ test('it should fail on unknown config keys (test-p)', function () {
 })->throws(Exception::class, 'unknown key [lang-path] in [scanner[0]]');
 
 test('it should validate every config before changing any file (test-q)', function () {
-    expect(fn () => run('default', [
-        '--config' => base_path('tests/Fixtures/test-q/scanner.json'),
-    ]))->toThrow(Exception::class, 'the "update" mode requires the [paths, extensions, methods] options.');
+    expect(function () {
+        return run('default', [
+            '--config' => base_path('tests/Fixtures/test-q/scanner.json'),
+        ]);
+    })->toThrow(Exception::class, 'the "update" mode requires the [paths, extensions, methods] options.');
 
     expect(getContent(base_path('tests/Fixtures/test-q/lang/en-US.json')))->toBe([]);
 });

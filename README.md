@@ -22,7 +22,7 @@ Although it’s a Laravel package, it’s flexible enough to scan translations f
 -   📑 `sort` automatically orders JSON keys globally (**enabled by default**).
 -   🔗 `--dot` saves translations in dot notation.
 -   🚫 `--no-update` skips updating JSON files when running `check` (verification only).
--   🔀 `merge` or `--merge` combines duplicate or related translations into a single entry.
+-   🔀 `--merge` combines duplicate or related translations into a single entry.
 -   📝 `--duplicate` lists all duplicate translations for review.
 -   ❌ `--remove` removes duplicate translations, keeping only the main version, when running `duplicate`.
 -   🧹 `--unused` lists translations that are not used in code, and `--prune` removes them.
@@ -102,19 +102,6 @@ Create a `scanner.json` file at the root of your Laravel project.
     "scanner": [
         {
             "check": true,
-            "lang_path": "lang/"
-        }
-    ]
-}
-```
-
-#### Example with `merge`:
-
-```json
-{
-    "scanner": [
-        {
-            "merge": true,
             "lang_path": "lang/"
         }
     ]

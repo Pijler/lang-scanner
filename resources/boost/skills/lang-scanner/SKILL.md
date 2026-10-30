@@ -37,7 +37,7 @@ Each entry of `scanner` is a config. Configs that share the same `lang_path` are
 ```
 
 - Each method must contain exactly one `*` placeholder, which marks where the key is.
-- `check: true` and `merge: true` can be set per config instead of passing the flags.
+- `check: true` can be set per config instead of passing the flag. The other modes are only enabled by their flags.
 - `extends` loads other configs, which is useful for modules: `{"extends": ["/modules/admin/scanner.json"]}`.
 - The file is validated before any change. Unknown keys, wrong types and missing options fail with a clear message.
 
@@ -46,6 +46,7 @@ Options required by each mode:
 | Mode        | Required options                              |
 | ----------- | --------------------------------------------- |
 | `update`    | `lang_path`, `paths`, `extensions`, `methods` |
+| `unused`    | `lang_path`, `paths`, `extensions`, `methods` |
 | `duplicate` | `lang_path`, `methods`                        |
 | `check`     | `lang_path`                                   |
 | `merge`     | `lang_path`                                   |

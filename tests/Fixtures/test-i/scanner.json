@@ -1,7 +1,6 @@
 {
     "scanner": [
         {
-            "merge": true,
             "lang_path": "lang/"
         }
     ]
