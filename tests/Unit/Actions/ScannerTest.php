@@ -7,7 +7,7 @@ test('it should check default checking as false', function () {
 
     $scanner = resolve(Scanner::class);
 
-    expect($this->callMethod($scanner, 'checked', [[]]))->toBeFalse();
+    expect($this->callMethod($scanner, 'check', [[]]))->toBeFalse();
 });
 
 test('it should check if checking is enabled via option', function () {
@@ -17,11 +17,11 @@ test('it should check if checking is enabled via option', function () {
 
     $config = ['check' => true];
 
-    expect($this->callMethod($scanner, 'checked', [$config]))->toBeTrue();
+    expect($this->callMethod($scanner, 'check', [$config]))->toBeTrue();
 
     $config = ['check' => false];
 
-    expect($this->callMethod($scanner, 'checked', [$config]))->toBeFalse();
+    expect($this->callMethod($scanner, 'check', [$config]))->toBeFalse();
 });
 
 test('it should check if checking is enabled via config', function () {
@@ -29,7 +29,7 @@ test('it should check if checking is enabled via config', function () {
 
     $scanner = resolve(Scanner::class);
 
-    expect($this->callMethod($scanner, 'checked', [[]]))->toBeTrue();
+    expect($this->callMethod($scanner, 'check', [[]]))->toBeTrue();
 
     app()->forgetInstance(Scanner::class);
 
@@ -37,5 +37,5 @@ test('it should check if checking is enabled via config', function () {
 
     $scanner = resolve(Scanner::class);
 
-    expect($this->callMethod($scanner, 'checked', [[]]))->toBeFalse();
+    expect($this->callMethod($scanner, 'check', [[]]))->toBeFalse();
 });

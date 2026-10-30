@@ -19,11 +19,8 @@ class ConfigurationValidator
         'sort' => 'bool',
         'paths' => 'list',
         'check' => 'bool',
-        'merge' => 'bool',
-        'remove' => 'bool',
         'methods' => 'list',
         'no-empty' => 'bool',
-        'duplicate' => 'bool',
         'no-update' => 'bool',
         'extensions' => 'list',
         'lang_path' => 'string',
@@ -37,6 +34,7 @@ class ConfigurationValidator
         'merge' => ['lang_path'],
         'duplicate' => ['lang_path', 'methods'],
         'update' => ['lang_path', 'paths', 'extensions', 'methods'],
+        'unused' => ['lang_path', 'paths', 'extensions', 'methods'],
     ];
 
     /**

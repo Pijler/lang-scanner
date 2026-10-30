@@ -304,6 +304,7 @@ test('it should run default command (test-e)', function () {
 
 test('it should run default command (test-i)', function () {
     [$status, $output] = run('default', [
+        '--merge' => true,
         '--config' => base_path('tests/Fixtures/test-i/scanner.json'),
     ]);
 

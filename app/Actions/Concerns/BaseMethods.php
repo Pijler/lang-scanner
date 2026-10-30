@@ -2,13 +2,18 @@
 
 namespace App\Actions\Concerns;
 
+use App\Enum\Status;
+use App\Output\ProgressOutput;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Finder\SplFileInfo;
 
 /**
  * @property InputInterface $input
+ * @property ProgressOutput $progressOutput
  */
 trait BaseMethods
 {
@@ -204,5 +209,73 @@ trait BaseMethods
             ->reduce(function (array $carry, array $item) {
                 return array_replace_recursive($carry, $this->extractKeys($item));
             }, []);
+    }
+
+    /**
+     * Get files to scan based on configuration.
+     */
+    protected function getFilesToScan(): Collection
+    {
+        return collect($this->config['paths'])
+            ->map(function ($path) {
+                $fullPath = $this->config['base_path'].'/'.$path;
+
+                return rescue(fn () => File::allFiles($fullPath), [], false);
+            })
+            ->collapse()
+            ->filter(function (SplFileInfo $file) {
+                return Str::endsWith($file->getFilename(), $this->config['extensions']);
+            })
+            ->filter(function (SplFileInfo $file) {
+                return Str::startsWith($file->getPathname(), $this->paths);
+            })
+            ->values();
+    }
+
+    /**
+     * Extracts the translation keys from the given files.
+     */
+    protected function collectKeys(Collection $files): array
+    {
+        return $files->flatMap(function (SplFileInfo $file) {
+            $this->totalFiles++;
+
+            $this->progressOutput->handle(Status::SKIPPED);
+
+            return $this->extractTranslationKeysFromFile($file);
+        })->all();
+    }
+
+    /**
+     * Extract translation keys from a file based on config methods.
+     */
+    private function extractTranslationKeysFromFile(SplFileInfo $file): array
+    {
+        $content = $file->getContents();
+
+        return collect($this->config['methods'])->map(function ($method) {
+            $pattern = explode('*', $method);
+
+            $end = preg_quote(data_get($pattern, 1, ''), '/');
+            $start = preg_quote(data_get($pattern, 0, ''), '/');
+
+            return $end === ''
+                ? "/(?<![A-Za-z0-9_]){$start}\\s*((['\"])((?:\\\\.|(?!\\2).)*?)\\2)/s"
+                : "/(?<![A-Za-z0-9_]){$start}\\s*((['\"])((?:\\\\.|(?!\\2).)*?)\\2).*?{$end}/s";
+        })->flatMap(function ($pattern) use ($content) {
+            preg_match_all($pattern, $content, $matches);
+
+            return $matches[3] ?? [];
+        })->map(function ($match) {
+            return $this->unescape($match);
+        })->filter(fn ($match) => $match !== '')->unique()->values()->toArray();
+    }
+
+    /**
+     * Removes the escaping backslashes from a quoted string content.
+     */
+    private function unescape(string $content): string
+    {
+        return preg_replace('/\\\\([\\\\\'"])/', '$1', $content);
     }
 }

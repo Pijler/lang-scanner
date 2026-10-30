@@ -46,7 +46,7 @@ class DuplicateScanner
      */
     protected function remove(): bool
     {
-        return $this->config['remove'] ?? $this->input->getOption('remove');
+        return $this->input->getOption('remove');
     }
 
     /**
