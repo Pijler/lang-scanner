@@ -4,6 +4,7 @@ namespace App\Actions\Base;
 
 use App\Actions\Concerns\BaseMethods;
 use App\Output\ProgressOutput;
+use Illuminate\Support\Collection;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Finder\SplFileInfo;
@@ -22,17 +23,27 @@ class UnusedScanner
     ) {}
 
     /**
-     * Scanner the configs that share the same language path.
+     * Scanner the project resolved by the current input and output.
      */
     public function execute(array $configs): array
     {
-        $keys = collect($configs)->flatMap(function (array $config) {
-            $this->config = $config;
+        $this->groupConfigs($configs)->each(function (array $group) {
+            $used = collect($group)->flatMap(function (array $config) {
+                $this->config = $config;
 
-            return $this->collectKeys($this->getFilesToScan());
+                return $this->collectKeys($this->getFilesToScan());
+            })->flip()->all();
+
+            collect($group)
+                ->unique(function (array $config) {
+                    return $this->getLangPath($config);
+                })
+                ->each(function (array $config) use ($used) {
+                    $this->config = $config;
+
+                    $this->unusedTranslations($used);
+                });
         });
-
-        $this->unusedTranslations($keys->flip()->all());
 
         return [$this->totalFiles, $this->changes];
     }
@@ -43,6 +54,35 @@ class UnusedScanner
     protected function prune(): bool
     {
         return $this->input->getOption('prune');
+    }
+
+    /**
+     * Gets the real language path of the given config.
+     */
+    private function getLangPath(array $config): string
+    {
+        $path = $config['base_path'].'/'.$config['lang_path'];
+
+        return realpath($path) ?: $path;
+    }
+
+    /**
+     * Groups the configs that share the language path or the methods, like the duplicate scanner.
+     */
+    private function groupConfigs(array $configs): Collection
+    {
+        return collect($configs)->reduce(function (Collection $groups, array $config) {
+            $keys = [$this->getLangPath($config), json_encode($config['methods'])];
+
+            [$linked, $groups] = $groups->partition(function (array $group) use ($keys) {
+                return filled(array_intersect($keys, data_get($group, 'keys')));
+            });
+
+            return $groups->push([
+                'keys' => $linked->pluck('keys')->collapse()->merge($keys)->unique()->all(),
+                'configs' => $linked->pluck('configs')->collapse()->push($config)->all(),
+            ]);
+        }, collect())->pluck('configs');
     }
 
     /**

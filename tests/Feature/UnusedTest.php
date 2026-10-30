@@ -117,3 +117,26 @@ test('it should skip the check configs when finding unused translations (test-r)
     expect($status)->toBe(1);
     expect($output)->toContain('FAIL', '2 files, 6 unused translations');
 });
+
+test('it should keep the translations used by other modules with the same methods (test-s)', function () {
+    [$status, $output] = run('default', [
+        '--prune' => true,
+        '--config' => base_path('tests/Fixtures/test-s/scanner.json'),
+    ]);
+
+    expect($status)->toBe(0);
+    expect($output)->toContain('Removed 3 unused translations');
+
+    expect(getContent(base_path('tests/Fixtures/test-s/admin/lang/en-US.json')))->toBe([
+        'Admin' => 'Admin',
+    ]);
+
+    expect(getContent(base_path('tests/Fixtures/test-s/admin/back/en-US.json')))->toBe([
+        'Back' => 'Back',
+    ]);
+
+    expect(getContent(base_path('tests/Fixtures/test-s/common/lang/en-US.json')))->toBe([
+        'Actions' => 'Actions',
+        'Common' => 'Common',
+    ]);
+});

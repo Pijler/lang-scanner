@@ -1,0 +1,40 @@
+{
+    "scanner": [
+        {
+            "lang_path": "common/lang/",
+            "paths": [
+                "common/js/"
+            ],
+            "extensions": [
+                ".js"
+            ],
+            "methods": [
+                "$t(*)"
+            ]
+        },
+        {
+            "lang_path": "admin/lang/",
+            "paths": [
+                "admin/js/"
+            ],
+            "extensions": [
+                ".js"
+            ],
+            "methods": [
+                "$t(*)"
+            ]
+        },
+        {
+            "lang_path": "admin/back/",
+            "paths": [
+                "admin/php/"
+            ],
+            "extensions": [
+                ".php"
+            ],
+            "methods": [
+                "__(*)"
+            ]
+        }
+    ]
+}

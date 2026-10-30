@@ -165,25 +165,17 @@ class Scanner
     }
 
     /**
-     * Groups the unused configs by language path, so a key used by any of them is kept.
+     * Joins the unused configs, since a key used by any module must be kept.
      */
     private function groupUnused(Collection $configs): Collection
     {
         $this->ensureFullScan();
 
-        return $configs
-            ->filter(function (array $item) {
-                return $item[0] === 'unused';
-            })
-            ->groupBy(function (array $item) {
-                $path = $item[1]['base_path'].'/'.$item[1]['lang_path'];
+        $configs = $configs->filter(function (array $item) {
+            return $item[0] === 'unused';
+        });
 
-                return realpath($path) ?: $path;
-            })
-            ->map(function (Collection $items) {
-                return ['unused', $items->pluck(1)->all()];
-            })
-            ->values();
+        return collect([['unused', $configs->pluck(1)->all()]]);
     }
 
     /**
