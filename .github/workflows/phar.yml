@@ -7,10 +7,9 @@ on:
     inputs:
       tag:
         required: true
-        description: 'Tag release version'
+        description: "Tag release version (e.g. v1.3.1)"
 
-permissions:
-  contents: write
+permissions: {}
 
 jobs:
   publish:
@@ -18,41 +17,67 @@ jobs:
 
     name: Release PHAR
 
+    permissions:
+      contents: write # upload the release asset
+      id-token: write # sign the build provenance
+      attestations: write
+
     steps:
       - name: Extract the tag version
         id: tag
+        env:
+          INPUT_TAG: ${{ github.event.inputs.tag }}
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            GITHUB_REF=${{ github.event.inputs.tag }}
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            GITHUB_REF="$INPUT_TAG"
           fi
-          echo "tag=${GITHUB_REF##*v}" >> "$GITHUB_OUTPUT"
+
+          TAG="${GITHUB_REF##*v}"
+
+          if ! [[ "$TAG" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$ ]]; then
+            echo "Invalid tag: $TAG"
+            exit 1
+          fi
+
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
       - name: Checkout the code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           ref: v${{ steps.tag.outputs.tag }}
+          persist-credentials: false
 
       - name: Setup PHP, with Composer and Extensions
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
         with:
           php-version: "8.5"
           tools: composer:v2
           coverage: none
 
       - name: Install Composer Dependencies
-        run: |
-          composer install --no-scripts
+        run: composer install --no-scripts
+
+      - name: Audit Dependencies
+        run: composer audit --locked
 
       - name: Create the PHAR file.
-        run: ./scanner app:build scanner.phar --build-version=${{ steps.tag.outputs.tag }}
+        env:
+          TAG: ${{ steps.tag.outputs.tag }}
+        run: ./scanner app:build scanner.phar --build-version="$TAG"
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: builds/scanner.phar
 
       - name: Upload the PHAR artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: scanner.phar
           path: builds/scanner.phar
 
       - name: Upload the PHAR to release
-        run: gh release upload v${{ steps.tag.outputs.tag }} builds/scanner.phar
+        run: gh release upload "v${TAG}" builds/scanner.phar --repo "$GITHUB_REPOSITORY"
         env:
+          TAG: ${{ steps.tag.outputs.tag }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

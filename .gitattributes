@@ -11,6 +11,7 @@
 /.github export-ignore
 /.gitignore export-ignore
 /README.md export-ignore
+/SECURITY.md export-ignore
 /RELEASE.md export-ignore
 /app export-ignore
 /bootstrap export-ignore

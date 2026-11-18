@@ -1,0 +1,25 @@
+version: 2
+
+updates:
+  - package-ecosystem: composer
+    directory: /
+    schedule:
+      interval: weekly
+    # Most malicious releases are caught and pulled within days. Security
+    # updates are not delayed by cooldown.
+    cooldown:
+      default-days: 7
+      semver-major-days: 14
+    groups:
+      composer-minor-and-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      actions:
+        patterns: ["*"]
